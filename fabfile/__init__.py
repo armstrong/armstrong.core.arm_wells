@@ -4,6 +4,7 @@ from ._utils import *
 def test():
     settings = {
         'INSTALLED_APPS': (
+            'django.contrib.contenttypes',
             'armstrong.core.arm_well',
             'armstrong.core.arm_well.tests.arm_well_support',
         ),
