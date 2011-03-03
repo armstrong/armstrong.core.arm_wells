@@ -19,3 +19,7 @@ class Node(models.Model):
 
     class Meta:
         ordering = ["order"]
+
+    def __unicode__(self):
+        return "%s (%d): %s" % (self.well.title, self.order,
+                                self.content_object)

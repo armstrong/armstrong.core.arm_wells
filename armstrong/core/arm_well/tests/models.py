@@ -1,6 +1,7 @@
 import random
 
 from ._utils import generate_random_story
+from ._utils import generate_random_well
 from ._utils import TestCase
 
 from ..models import Node
@@ -30,3 +31,15 @@ class WellTestCase(TestCase):
 
         self.assertEqual(first, well.nodes.all()[0])
         self.assertEqual(second, well.nodes.all()[1])
+
+
+class NodeTestCase(TestCase):
+    def test_string_representation(self):
+        story = generate_random_story()
+        well = generate_random_well()
+        order = random.randint(100, 200)
+        node = Node.objects.create(well=well, content_object=story,
+                                   order=order)
+
+        expected = "%s (%d): %s" % (well.title, order, story.title)
+        self.assertEqual(expected, str(node))
