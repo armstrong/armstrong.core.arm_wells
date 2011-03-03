@@ -19,3 +19,14 @@ class WellTestCase(TestCase):
 
         self.assertEqual(r, well.nodes.count())
 
+    def test_nodes_are_sorted_by_order(self):
+        well = Well.objects.create(title="foo")
+        second = Node.objects.create(well=well,
+                                     content_object=generate_random_story(),
+                                     order=100)
+        first = Node.objects.create(well=well,
+                                    content_object=generate_random_story(),
+                                    order=10)
+
+        self.assertEqual(first, well.nodes.all()[0])
+        self.assertEqual(second, well.nodes.all()[1])
