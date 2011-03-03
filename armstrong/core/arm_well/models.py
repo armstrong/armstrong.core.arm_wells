@@ -6,9 +6,6 @@ from django.contrib.contenttypes.models import ContentType
 class Well(models.Model):
     title = models.SlugField()
 
-    def add(self, *args, **kwargs):
-        pass
-
 
 class Node(models.Model):
     well = models.ForeignKey(Well, related_name="nodes")
