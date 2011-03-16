@@ -1,6 +1,10 @@
 from ._utils import *
 
 @task
+def pep8():
+    local('find ./armstrong -name "*.py" | xargs pep8', capture=False)
+
+@task
 def test():
     settings = {
         'INSTALLED_APPS': (
