@@ -33,6 +33,13 @@ class WellTestCase(TestCase):
         self.assertEqual(first, well.nodes.all()[0])
         self.assertEqual(second, well.nodes.all()[1])
 
+    def test_outputs_title_and_pub_date_when_cast_to_string(self):
+        title = "some-random-title-%d" % random.randint(10, 100)
+        date = datetime.datetime.now()
+
+        well = Well.objects.create(title=title, pub_date=date)
+        self.assertEqual("%s (%s)" % (title, date), str(well))
+
 
 class NodeTestCase(TestCase):
     def test_string_representation(self):

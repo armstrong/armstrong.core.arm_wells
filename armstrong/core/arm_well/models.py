@@ -12,6 +12,9 @@ class Well(models.Model):
 
     objects = WellManager()
 
+    def __unicode__(self):
+        return "%s (%s)" % (self.title, self.pub_date)
+
     def save(self, *args, **kwargs):
         if not self.pub_date:
             self.pub_date = datetime.datetime.now()
