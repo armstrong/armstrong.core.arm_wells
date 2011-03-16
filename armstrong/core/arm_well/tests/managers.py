@@ -29,3 +29,15 @@ class WellManagerTestCase(TestCase):
                                        pub_date=twenty_minutes_ago)
 
         self.assertEqual(expected, Well.objects.get_current("well-title"))
+
+    def test_get_current_should_raise_DoesNotExist_on_no_valid(self):
+        now = datetime.datetime.now()
+        ten_minutes_ago = now - datetime.timedelta(minutes=10)
+        twenty_minutes_ago = now - datetime.timedelta(minutes=20)
+
+        expired = Well.objects.create(title="well-title",
+                                      pub_date=twenty_minutes_ago,
+                                      expires=ten_minutes_ago)
+
+        self.assertRaises(Well.DoesNotExist, Well.objects.get_current,
+                          "well-title")

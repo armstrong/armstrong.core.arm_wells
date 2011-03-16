@@ -7,4 +7,8 @@ class WellManager(models.Manager):
         now = datetime.datetime.now()
         queryset = self.filter(title=title, pub_date__lte=now) \
             .exclude(expires__lte=now, expires__isnull=False)
-        return queryset[0]
+
+        try:
+            return queryset[0]
+        except IndexError:
+            raise self.model.DoesNotExist
