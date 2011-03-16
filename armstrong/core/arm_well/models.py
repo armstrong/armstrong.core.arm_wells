@@ -7,7 +7,7 @@ from .managers import WellManager
 
 
 class Well(models.Model):
-    title = models.SlugField()
+    title = models.CharField(max_length=100)
     pub_date = models.DateTimeField()
     expires = models.DateTimeField(null=True)
     active = models.BooleanField(default=True)
