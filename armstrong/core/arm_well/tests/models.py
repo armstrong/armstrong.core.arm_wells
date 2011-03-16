@@ -38,7 +38,14 @@ class WellTestCase(TestCase):
         date = datetime.datetime.now()
 
         well = Well.objects.create(title=title, pub_date=date)
-        self.assertEqual("%s (%s)" % (title, date), str(well))
+        self.assertEqual("%s (%s - Never)" % (title, date), str(well))
+
+    def test_outputs_expires_if_present(self):
+        title = "some-random-title-%d" % random.randint(10, 100)
+        date = datetime.datetime.now()
+
+        well = Well.objects.create(title=title, pub_date=date, expires=date)
+        self.assertEqual("%s (%s - %s)" % (title, date, date), str(well))
 
 
 class NodeTestCase(TestCase):
