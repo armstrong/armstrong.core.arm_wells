@@ -9,6 +9,7 @@ from .managers import WellManager
 class Well(models.Model):
     title = models.SlugField()
     pub_date = models.DateTimeField()
+    expires = models.DateTimeField(null=True)
 
     objects = WellManager()
 
