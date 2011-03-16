@@ -9,7 +9,7 @@ from ..models import Well
 
 
 class WellTestCase(TestCase):
-    def test_has_many_nodes_as_are_added(self):
+    def test_has_as_many_nodes_as_are_added(self):
         well = Well.objects.create(title="foo")
         self.assertEqual(0, well.nodes.count(), msg="Sanity check")
 
