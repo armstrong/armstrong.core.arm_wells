@@ -41,3 +41,9 @@ class WellManagerTestCase(TestCase):
 
         self.assertRaises(Well.DoesNotExist, Well.objects.get_current,
                           "well-title")
+
+    def test_get_current_should_only_return_active(self):
+        inactive = Well.objects.create(title="well-title", active=False)
+
+        self.assertRaises(Well.DoesNotExist, Well.objects.get_current,
+                          "well-title")

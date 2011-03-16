@@ -10,6 +10,7 @@ class Well(models.Model):
     title = models.SlugField()
     pub_date = models.DateTimeField()
     expires = models.DateTimeField(null=True)
+    active = models.BooleanField(default=True)
 
     objects = WellManager()
 
