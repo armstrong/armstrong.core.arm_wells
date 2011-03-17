@@ -2,6 +2,8 @@ import datetime
 from django.db import models
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
+from django.template import RequestContext
+from django.template.loader import render_to_string
 
 from .managers import WellManager
 
@@ -22,6 +24,19 @@ class Well(models.Model):
         if not self.pub_date:
             self.pub_date = datetime.datetime.now()
         return super(Well, self).save(*args, **kwargs)
+
+    def render(self, request=None):
+        ret = []
+        kwargs = {}
+        if request:
+            kwargs['context_instance'] = RequestContext(request)
+
+        for node in self.nodes.all():
+            ret.append(render_to_string("wells/%s/%s/%s.html" % (
+                node.content_object._meta.app_label,
+                node.content_object._meta.object_name.lower(),
+                self.title), **kwargs))
+        return ''.join(ret)
 
 
 class Node(models.Model):
