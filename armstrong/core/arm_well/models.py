@@ -32,6 +32,10 @@ class Well(models.Model):
             kwargs['context_instance'] = RequestContext(request)
 
         for node in self.nodes.all():
+            kwargs["dictionary"] = {
+                    "well": self,
+                    "object": node.content_object,
+            }
             ret.append(render_to_string("wells/%s/%s/%s.html" % (
                 node.content_object._meta.app_label,
                 node.content_object._meta.object_name.lower(),

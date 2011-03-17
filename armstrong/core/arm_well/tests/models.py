@@ -60,7 +60,9 @@ class WellTestCase(TestCase):
         random_return = str(random.randint(1000, 2000))
 
         render_to_string = fudge.Fake(callable=True)
-        render_to_string.with_args(expected_path).returns(random_return)
+        context = {"well": well, "object": story}
+        render_to_string.with_args(expected_path, dictionary=context) \
+                .returns(random_return)
 
         with fudge.patched_context(models, "render_to_string",
                 render_to_string):
@@ -87,7 +89,8 @@ class WellTestCase(TestCase):
         RequestContext.with_args(request).returns(mock_context_instance)
 
         render_to_string = fudge.Fake(callable=True)
-        render_to_string.with_args(expected_path,
+        context = {"well": well, "object": story}
+        render_to_string.with_args(expected_path, dictionary=context,
                 context_instance=mock_context_instance).returns(random_return)
 
         with fudge.patched_context(models, "render_to_string",
@@ -98,6 +101,33 @@ class WellTestCase(TestCase):
 
                 self.assertEqual(result, random_return,
                         msg="Returns what was expected")
+
+    def test_render_loads_template_for_node_without_mocks(self):
+        well = Well.objects.create(title="foobar")
+        story = generate_random_story()
+        node = Node.objects.create(well=well, content_object=story)
+
+        result = well.render().strip()
+        expected = "\n".join(["Story Template",
+            "Story: %s" % story.title,
+            "Well: %s" % well.title,
+            ])
+
+        self.assertEqual(expected, result)
+
+    def test_render_loads_template_with_request_for_nodes_without_mocks(self):
+        well = Well.objects.create(title="foobar")
+        story = generate_random_story()
+        node = Node.objects.create(well=well, content_object=story)
+
+        result = well.render([123]).strip()
+        expected = "\n".join(["Story Template",
+            "Story: %s" % story.title,
+            "Well: %s" % well.title,
+            "Got Request!",
+            ])
+
+        self.assertEqual(expected, result)
 
 
 class NodeTestCase(TestCase):
