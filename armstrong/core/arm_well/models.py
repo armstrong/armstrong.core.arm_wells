@@ -4,6 +4,7 @@ from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 from django.template import RequestContext
 from django.template.loader import render_to_string
+from django.template import TemplateDoesNotExist
 
 from .managers import WellManager
 
@@ -36,10 +37,20 @@ class Well(models.Model):
                     "well": self,
                     "object": node.content_object,
             }
-            ret.append(render_to_string("wells/%s/%s/%s.html" % (
-                node.content_object._meta.app_label,
-                node.content_object._meta.object_name.lower(),
-                self.title), **kwargs))
+            content = node.content_object
+
+            if hasattr(content, "render"):
+                ret.append(content.render(request))
+            else:
+                try:
+                    ret.append(render_to_string("wells/%s/%s/%s.html" % (
+                        content._meta.app_label,
+                        content._meta.object_name.lower(),
+                        self.title), **kwargs))
+                except TemplateDoesNotExist:
+                    ret.append(render_to_string("wells/%s/%s/default.html" % (
+                        content._meta.app_label,
+                        content._meta.object_name.lower()), **kwargs))
         return ''.join(ret)
 
 
