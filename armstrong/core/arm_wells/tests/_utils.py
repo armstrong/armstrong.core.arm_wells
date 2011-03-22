@@ -2,7 +2,7 @@ import random
 
 from django.test import TestCase
 
-from .arm_well_support.models import Story
+from .arm_wells_support.models import Story
 from ..models import Well
 
 
