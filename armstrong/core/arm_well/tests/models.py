@@ -129,23 +129,15 @@ class WellTestCase(TestCase):
 
         self.assertEqual(expected, result)
 
-    def test_render_loads_default_template_without_mocks(self):
-        well = Well.objects.create(title="needadefault")
-        story = generate_random_story()
-        node = Node.objects.create(well=well, content_object=story)
-
-        result = well.render([123]).strip()
-        expected = "\n".join(["Default Story Template",
-            "Story: %s" % story.title,
-            "Well: %s" % well.title,
-            ])
-
-        self.assertEqual(expected, result)
-
-    def test_render_loads_template_of_nested_well(self):
+    def test_calls_render_on_inner_well(self):
+        """
+        This fails if render() is not invoked because there is no "outer.html"
+        template file.
+        """
         outer_well = Well.objects.create(title="outer")
         inner_well = Well.objects.create(title="foobar")
-        well_node = Node.objects.create(well=outer_well, content_object=inner_well)
+        well_node = Node.objects.create(well=outer_well,
+                                        content_object=inner_well)
         story = generate_random_story()
         story_node = Node.objects.create(well=inner_well, content_object=story)
 
@@ -157,25 +149,6 @@ class WellTestCase(TestCase):
 
         self.assertEqual(expected, result)
 
-    def test_render_loads_template_of_mixed_nesting_well(self):
-        outer_well = Well.objects.create(title="outer")
-        inner_well = Well.objects.create(title="foobar")
-        well_node = Node.objects.create(well=outer_well, content_object=inner_well, order=20)
-        story1 = generate_random_story()
-        story2 = generate_random_story()
-        unnested_node = Node.objects.create(well=outer_well, content_object=story1, order=10)
-        nested_node = Node.objects.create(well=inner_well, content_object=story2, order=100)
-
-        result = outer_well.render().strip()
-        expected = "\n".join(["Default Story Template",
-            "Story: %s" % story1.title,
-            "Well: %s" % outer_well.title,
-            "Story Template",
-            "Story: %s" % story2.title,
-            "Well: %s" % inner_well.title,
-            ])
-
-        self.assertEqual(expected, result)
 
 class NodeTestCase(TestCase):
     def test_string_representation(self):

@@ -42,15 +42,10 @@ class Well(models.Model):
             if hasattr(content, "render"):
                 ret.append(content.render(request))
             else:
-                try:
-                    ret.append(render_to_string("wells/%s/%s/%s.html" % (
-                        content._meta.app_label,
-                        content._meta.object_name.lower(),
-                        self.title), **kwargs))
-                except TemplateDoesNotExist:
-                    ret.append(render_to_string("wells/%s/%s/default.html" % (
-                        content._meta.app_label,
-                        content._meta.object_name.lower()), **kwargs))
+                ret.append(render_to_string("wells/%s/%s/%s.html" % (
+                    content._meta.app_label,
+                    content._meta.object_name.lower(),
+                    self.title), **kwargs))
         return ''.join(ret)
 
 
