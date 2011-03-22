@@ -12,7 +12,7 @@ from .managers import WellManager
 class Well(models.Model):
     title = models.CharField(max_length=100)
     pub_date = models.DateTimeField()
-    expires = models.DateTimeField(null=True)
+    expires = models.DateTimeField(null=True, blank=True)
     active = models.BooleanField(default=True)
 
     objects = WellManager()
