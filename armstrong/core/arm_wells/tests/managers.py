@@ -3,6 +3,7 @@ import datetime
 from ._utils import TestCase
 
 from ..models import Well
+from ..models import WellType
 
 
 class WellManagerTestCase(TestCase):
@@ -11,9 +12,10 @@ class WellManagerTestCase(TestCase):
         future_time = now + datetime.timedelta(minutes=10)
         past_time = now - datetime.timedelta(minutes=10)
 
-        future = Well.objects.create(title="well-title", pub_date=future_time)
-        present = Well.objects.create(title="well-title")
-        past = Well.objects.create(title="well-title", pub_date=past_time)
+        type = WellType.objects.create(title="well-title", slug="well-title")
+        future = Well.objects.create(type=type, pub_date=future_time)
+        present = Well.objects.create(type=type)
+        past = Well.objects.create(type=type, pub_date=past_time)
 
         self.assertEqual(present, Well.objects.get_current("well-title"))
 
@@ -22,10 +24,11 @@ class WellManagerTestCase(TestCase):
         ten_minutes_ago = now - datetime.timedelta(minutes=10)
         twenty_minutes_ago = now - datetime.timedelta(minutes=20)
 
-        expired = Well.objects.create(title="well-title",
+        type = WellType.objects.create(title="well-title", slug="well-title")
+        expired = Well.objects.create(type=type,
                                       pub_date=twenty_minutes_ago,
                                       expires=ten_minutes_ago)
-        expected = Well.objects.create(title="well-title",
+        expected = Well.objects.create(type=type,
                                        pub_date=twenty_minutes_ago)
 
         self.assertEqual(expected, Well.objects.get_current("well-title"))
@@ -35,7 +38,8 @@ class WellManagerTestCase(TestCase):
         ten_minutes_ago = now - datetime.timedelta(minutes=10)
         twenty_minutes_ago = now - datetime.timedelta(minutes=20)
 
-        expired = Well.objects.create(title="well-title",
+        type = WellType.objects.create(title="well-title", slug="well-title")
+        expired = Well.objects.create(type=type,
                                       pub_date=twenty_minutes_ago,
                                       expires=ten_minutes_ago)
 
@@ -43,7 +47,8 @@ class WellManagerTestCase(TestCase):
                           "well-title")
 
     def test_get_current_should_only_return_active(self):
-        inactive = Well.objects.create(title="well-title", active=False)
+        type = WellType.objects.create(title="well-title", slug="well-title")
+        inactive = Well.objects.create(type=type, active=False)
 
         self.assertRaises(Well.DoesNotExist, Well.objects.get_current,
                           "well-title")

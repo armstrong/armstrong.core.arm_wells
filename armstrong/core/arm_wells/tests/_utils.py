@@ -4,6 +4,7 @@ from django.test import TestCase
 
 from .arm_wells_support.models import Story
 from ..models import Well
+from ..models import WellType
 
 
 def generate_random_story():
@@ -13,5 +14,11 @@ def generate_random_story():
 
 
 def generate_random_well():
-    title = "Random Well %d" % random.randint(100, 200)
-    return Well.objects.create(title=title)
+    return Well.objects.create(type=generate_random_welltype())
+
+
+def generate_random_welltype():
+    r = random.randint(100, 200)
+    title = "Random Well %d" % r
+    slug = "random-well-%d" % r
+    return WellType.objects.create(title=title, slug=slug)

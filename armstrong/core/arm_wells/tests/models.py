@@ -4,16 +4,18 @@ import random
 
 from ._utils import generate_random_story
 from ._utils import generate_random_well
+from ._utils import generate_random_welltype
 from ._utils import TestCase
 
 from ..models import Node
 from ..models import Well
+from ..models import WellType
 from .. import models
 
 
 class WellTestCase(TestCase):
     def test_has_as_many_nodes_as_are_added(self):
-        well = Well.objects.create(title="foo")
+        well = generate_random_well()
         self.assertEqual(0, well.nodes.count(), msg="Sanity check")
 
         r = random.randint(1, 10)
@@ -24,7 +26,7 @@ class WellTestCase(TestCase):
         self.assertEqual(r, well.nodes.count())
 
     def test_nodes_are_sorted_by_order(self):
-        well = Well.objects.create(title="foo")
+        well = generate_random_well()
         second = Node.objects.create(well=well,
                                      content_object=generate_random_story(),
                                      order=100)
@@ -39,19 +41,22 @@ class WellTestCase(TestCase):
         title = "some-random-title-%d" % random.randint(10, 100)
         date = datetime.datetime.now()
 
-        well = Well.objects.create(title=title, pub_date=date)
+        type = WellType.objects.create(title=title, slug=title)
+        well = Well.objects.create(type=type, pub_date=date)
         self.assertEqual("%s (%s - Never)" % (title, date), str(well))
 
     def test_outputs_expires_if_present(self):
         title = "some-random-title-%d" % random.randint(10, 100)
         date = datetime.datetime.now()
 
-        well = Well.objects.create(title=title, pub_date=date, expires=date)
+        type = WellType.objects.create(title=title, slug=title)
+        well = Well.objects.create(type=type, pub_date=date, expires=date)
         self.assertEqual("%s (%s - %s)" % (title, date, date), str(well))
 
     def test_render_loads_template_for_node(self):
         title = "some-random-well-%d" % random.randint(100, 200)
-        well = Well.objects.create(title=title)
+        type = WellType.objects.create(title=title, slug=title)
+        well = Well.objects.create(type=type)
         story = generate_random_story()
         node = Node.objects.create(well=well, content_object=story)
 
@@ -73,7 +78,8 @@ class WellTestCase(TestCase):
 
     def test_passes_RequestContext_to_template_if_provided_to_render(self):
         title = "some-random-well-%d" % random.randint(100, 200)
-        well = Well.objects.create(title=title)
+        type = WellType.objects.create(title=title, slug=title)
+        well = Well.objects.create(type=type)
         story = generate_random_story()
         node = Node.objects.create(well=well, content_object=story)
 
@@ -103,27 +109,29 @@ class WellTestCase(TestCase):
                         msg="Returns what was expected")
 
     def test_render_loads_template_for_node_without_mocks(self):
-        well = Well.objects.create(title="foobar")
+        type = WellType.objects.create(title="Foobar", slug="foobar")
+        well = Well.objects.create(type=type)
         story = generate_random_story()
         node = Node.objects.create(well=well, content_object=story)
 
         result = well.render().strip()
         expected = "\n".join(["Story Template",
             "Story: %s" % story.title,
-            "Well: %s" % well.title,
+            "Well: %s" % type.title,
             ])
 
         self.assertEqual(expected, result)
 
     def test_render_loads_template_with_request_for_nodes_without_mocks(self):
-        well = Well.objects.create(title="foobar")
+        type = WellType.objects.create(title="Foobar", slug="foobar")
+        well = Well.objects.create(type=type)
         story = generate_random_story()
         node = Node.objects.create(well=well, content_object=story)
 
         result = well.render([123]).strip()
         expected = "\n".join(["Story Template",
             "Story: %s" % story.title,
-            "Well: %s" % well.title,
+            "Well: %s" % type.title,
             "Got Request!",
             ])
 
@@ -134,8 +142,10 @@ class WellTestCase(TestCase):
         This fails if render() is not invoked because there is no "outer.html"
         template file.
         """
-        outer_well = Well.objects.create(title="outer")
-        inner_well = Well.objects.create(title="foobar")
+        outer_type = WellType.objects.create(title="outer", slug="outer")
+        outer_well = Well.objects.create(type=outer_type)
+        inner_type = WellType.objects.create(title="foobar", slug="foobar")
+        inner_well = Well.objects.create(type=inner_type)
         well_node = Node.objects.create(well=outer_well,
                                         content_object=inner_well)
         story = generate_random_story()
@@ -144,7 +154,7 @@ class WellTestCase(TestCase):
         result = outer_well.render().strip()
         expected = "\n".join(["Story Template",
             "Story: %s" % story.title,
-            "Well: %s" % inner_well.title,
+            "Well: %s" % inner_type.title,
             ])
 
         self.assertEqual(expected, result)
@@ -158,5 +168,5 @@ class NodeTestCase(TestCase):
         node = Node.objects.create(well=well, content_object=story,
                                    order=order)
 
-        expected = "%s (%d): %s" % (well.title, order, story.title)
+        expected = "%s (%d): %s" % (well.type.title, order, story.title)
         self.assertEqual(expected, str(node))

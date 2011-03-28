@@ -9,8 +9,16 @@ from django.template import TemplateDoesNotExist
 from .managers import WellManager
 
 
-class Well(models.Model):
+class WellType(models.Model):
     title = models.CharField(max_length=100)
+    slug = models.SlugField()
+
+    def __unicode__(self):
+        return self.title
+
+
+class Well(models.Model):
+    type = models.ForeignKey(WellType)
     pub_date = models.DateTimeField()
     expires = models.DateTimeField(null=True, blank=True)
     active = models.BooleanField(default=True)
@@ -18,7 +26,7 @@ class Well(models.Model):
     objects = WellManager()
 
     def __unicode__(self):
-        return "%s (%s - %s)" % (self.title, self.pub_date,
+        return "%s (%s - %s)" % (self.type, self.pub_date,
                                  self.expires or "Never")
 
     def save(self, *args, **kwargs):
@@ -45,7 +53,7 @@ class Well(models.Model):
                 ret.append(render_to_string("wells/%s/%s/%s.html" % (
                     content._meta.app_label,
                     content._meta.object_name.lower(),
-                    self.title), **kwargs))
+                    self.type.slug), **kwargs))
         return ''.join(ret)
 
 
@@ -60,5 +68,5 @@ class Node(models.Model):
         ordering = ["order"]
 
     def __unicode__(self):
-        return "%s (%d): %s" % (self.well.title, self.order,
+        return "%s (%d): %s" % (self.well.type.title, self.order,
                                 self.content_object)
