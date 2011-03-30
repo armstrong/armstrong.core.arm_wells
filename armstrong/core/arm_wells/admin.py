@@ -12,7 +12,7 @@ class NodeAdmin(VersionAdmin):
 
 class NodeGrappelli(VersionAdmin):
     related_lookup_fields = [
-        ['content_type', 'object_id',]
+        ['content_type', 'object_id', ]
     ]
 
 
@@ -23,7 +23,7 @@ class NodeInline(admin.TabularInline):
     # This is for Grappelli
     sortable_field_name = "order"
     related_lookup_fields = {
-        'generic': ['content_type', 'object_id',]
+        'generic': ['content_type', 'object_id', ]
     }
 
 
