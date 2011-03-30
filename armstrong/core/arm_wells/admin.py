@@ -16,7 +16,7 @@ class NodeGrappelli(VersionAdmin):
     ]
 
 
-class NodeInline(generic.GenericTabularInline):
+class NodeInline(admin.TabularInline):
     model = models.Node
     extra = 1
 
