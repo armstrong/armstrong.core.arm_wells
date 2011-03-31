@@ -6,23 +6,25 @@ from .models import Well
 
 
 class SimpleWellView(TemplateView):
-    def render_to_response(self, context, **response_kwargs):
-        if not 'params' in context:
-            raise ImproperlyConfigured(
-                    _(u"Expects `params` to be provided in the context"))
-        if not self.template_name:
-            if not 'template_name' in context['params']:
-                raise ImproperlyConfigured(
-                        _(u"Expects `template_name` to be provided"))
-            else:
-                self.template_name = context['params']['template_name']
+    well_title = None
 
-        if not 'well_title' in context['params']:
+    def __init__(self, *args, **kwargs):
+        super(SimpleWellView, self).__init__(*args, **kwargs)
+        if not self.well_title:
             raise ImproperlyConfigured(
                     _(u"Expects a `well_title` to be provided"))
 
-        well_title = context['params']['well_title']
-        context['well'] = Well.objects.get_current(title=well_title)
+    def get_context_data(self, **kwargs):
+        context = super(SimpleWellView, self).get_context_data(**kwargs)
+        context["well"] = Well.objects.get_current(title=self.well_title)
+        return context
 
-        return super(SimpleWellView, self).render_to_response(context,
-                **response_kwargs)
+
+class QuerySetBackedWellView(SimpleWellView):
+    queryset = None
+
+    def __init__(self, *args, **kwargs):
+        super(QuerySetBackedWellView, self).__init__(*args, **kwargs)
+        if not self.queryset:
+            raise ImproperlyConfigured(
+                    _(u"Expects a `queryset` to be provided"))

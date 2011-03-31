@@ -1,6 +1,7 @@
 import random
 
 from django.test import TestCase as DjangoTestCase
+from django.test.client import RequestFactory
 
 from .arm_wells_support.models import Story
 from ..models import Well
@@ -25,6 +26,9 @@ def generate_random_welltype():
 
 
 class TestCase(DjangoTestCase):
+    def setUp(self):
+        self.factory = RequestFactory()
+
     def assertInContext(self, var_name, other, template_or_context):
         # TODO: support passing in a straight "context" (i.e., dict)
         context = template_or_context.context_data

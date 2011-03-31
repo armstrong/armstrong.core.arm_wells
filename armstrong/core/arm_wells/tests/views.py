@@ -1,61 +1,69 @@
 from django.core.exceptions import ImproperlyConfigured
+from django.db.models.query import QuerySet
 from django.http import HttpRequest
+from django.test.client import RequestFactory
 import fudge
 
 from ._utils import generate_random_well
 from ._utils import TestCase
 
 from ..views import SimpleWellView
+from ..views import QuerySetBackedWellView
 
 
-def generate_view(cls):
-    view = SimpleWellView()
-    fake_request = fudge.Fake(HttpRequest)
-    view.request = fake_request
-    return view
+class WellViewTestCase(TestCase):
+    def setUp(self):
+        super(WellViewTestCase, self).setUp()
+        self.well = generate_random_well()
 
-
-def generate_render_context(well_title=None):
-    if not well_title:
-        well = generate_random_well()
-        well_title = well.type.title
-
-    return {
-        "params": {
-            "template_name": "index.html",
-            "well_title": well_title,
-        },
-    }
-
-
-class SimpleWellViewTest(TestCase):
+class SimpleWellViewTest(WellViewTestCase):
     view_class = SimpleWellView
 
-    def test_raises_exception_when_called_without_params(self):
-        view = self.view_class()
-        self.assertRaises(ImproperlyConfigured, view.render_to_response, {})
+    def default_kwargs(self):
+        return {
+            "template_name": "index.html",
+            "well_title": self.well.type.title,
+        }
 
     def test_raises_exception_without_template_name_param(self):
-        view = self.view_class()
-        self.assertRaises(ImproperlyConfigured, view.render_to_response,
-                {'params': {}})
+        kwargs = self.default_kwargs()
+        del kwargs["template_name"]
+        view = self.view_class.as_view(**kwargs)
+        with self.assertRaises(ImproperlyConfigured) as context_manager:
+            response = view(self.factory.get("/"))
+
+        self.assertEqual(
+            "TemplateResponseMixin requires either a definition of "
+            "'template_name' or an implementation of "
+            "'get_template_names()'",
+            context_manager.exception.message)
 
     def test_does_not_raise_if_template_name_is_present(self):
-        view = generate_view(self.view_class)
-        view.template_name = "index.html"
-        args = generate_render_context()
-        del args['params']['template_name']
-        view.render_to_response(args)
+        view = self.view_class.as_view(**self.default_kwargs())
+        view(self.factory.get("/"))
 
     def test_raises_exception_on_no_well_in_params(self):
-        view = generate_view(self.view_class)
-        args = generate_render_context()
-        del args['params']['well_title']
-        self.assertRaises(ImproperlyConfigured, view.render_to_response, args)
+        kwargs = self.default_kwargs()
+        del kwargs["well_title"]
+        view = self.view_class.as_view(**kwargs)
+        self.assertRaises(ImproperlyConfigured, view, self.factory.get("/"))
 
     def test_passes_a_well_to_the_render(self):
-        well = generate_random_well()
-        view = generate_view(self.view_class)
-        args = generate_render_context(well_title=well.type.title)
-        result = view.render_to_response(args)
-        self.assertInContext('well', well, result)
+        view = self.view_class.as_view(**self.default_kwargs())
+        result = view(self.factory.get("/"))
+        self.assertInContext('well', self.well, result)
+
+
+class QuerySetBackedWellViewTest(SimpleWellViewTest):
+    view_class = QuerySetBackedWellView
+
+    def default_kwargs(self):
+        kwargs = super(QuerySetBackedWellViewTest, self).default_kwargs()
+        kwargs['queryset'] = fudge.Fake(QuerySet)
+        return kwargs
+
+    def test_raises_exception_if_no_queryset_provided(self):
+        kwargs = self.default_kwargs()
+        del kwargs["queryset"]
+        view = self.view_class.as_view(**kwargs)
+        self.assertRaises(ImproperlyConfigured, view, self.factory.get("/"))
