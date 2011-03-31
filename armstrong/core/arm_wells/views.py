@@ -15,8 +15,8 @@ class SimpleWellView(TemplateView):
             else:
                 self.template_name = context['params']['template_name']
 
-        if not 'well' in context['params']:
-            raise ImproperlyConfigured(_(u"Expects a `well` to be provided"))
+        if not 'well_title' in context['params']:
+            raise ImproperlyConfigured(_(u"Expects a `well_title` to be provided"))
 
         return super(SimpleWellView, self).render_to_response(context,
                 **response_kwargs)

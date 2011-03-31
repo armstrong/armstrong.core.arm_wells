@@ -18,7 +18,7 @@ def generate_render_context():
     return {
         "params": {
             "template_name": "index.html",
-            "well": "front-page",
+            "well_title": "front-page",
         },
     }
 
@@ -43,5 +43,5 @@ class SimpleWellViewTest(TestCase):
     def test_raises_exception_on_no_well_in_params(self):
         view = generate_view(SimpleWellView)
         args = generate_render_context()
-        del args['params']['well']
+        del args['params']['well_title']
         self.assertRaises(ImproperlyConfigured, view.render_to_response, args)
