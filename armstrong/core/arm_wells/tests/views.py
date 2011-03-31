@@ -29,31 +29,33 @@ def generate_render_context(well_title=None):
 
 
 class SimpleWellViewTest(TestCase):
+    view_class = SimpleWellView
+
     def test_raises_exception_when_called_without_params(self):
-        view = SimpleWellView()
+        view = self.view_class()
         self.assertRaises(ImproperlyConfigured, view.render_to_response, {})
 
     def test_raises_exception_without_template_name_param(self):
-        view = SimpleWellView()
+        view = self.view_class()
         self.assertRaises(ImproperlyConfigured, view.render_to_response,
                 {'params': {}})
 
     def test_does_not_raise_if_template_name_is_present(self):
-        view = generate_view(SimpleWellView)
+        view = generate_view(self.view_class)
         view.template_name = "index.html"
         args = generate_render_context()
         del args['params']['template_name']
         view.render_to_response(args)
 
     def test_raises_exception_on_no_well_in_params(self):
-        view = generate_view(SimpleWellView)
+        view = generate_view(self.view_class)
         args = generate_render_context()
         del args['params']['well_title']
         self.assertRaises(ImproperlyConfigured, view.render_to_response, args)
 
     def test_passes_a_well_to_the_render(self):
         well = generate_random_well()
-        view = generate_view(SimpleWellView)
+        view = generate_view(self.view_class)
         args = generate_render_context(well_title=well.type.title)
         result = view.render_to_response(args)
         self.assertInContext('well', well, result)
