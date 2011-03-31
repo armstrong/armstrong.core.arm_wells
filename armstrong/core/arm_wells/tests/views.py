@@ -2,6 +2,7 @@ from django.core.exceptions import ImproperlyConfigured
 from django.http import HttpRequest
 import fudge
 
+from ._utils import generate_random_well
 from ._utils import TestCase
 
 from ..views import SimpleWellView
@@ -14,11 +15,15 @@ def generate_view(cls):
     return view
 
 
-def generate_render_context():
+def generate_render_context(well_title=None):
+    if not well_title:
+        well = generate_random_well()
+        well_title = well.type.title
+
     return {
         "params": {
             "template_name": "index.html",
-            "well_title": "front-page",
+            "well_title": well_title,
         },
     }
 
@@ -45,3 +50,10 @@ class SimpleWellViewTest(TestCase):
         args = generate_render_context()
         del args['params']['well_title']
         self.assertRaises(ImproperlyConfigured, view.render_to_response, args)
+
+    def test_passes_a_well_to_the_render(self):
+        well = generate_random_well()
+        view = generate_view(SimpleWellView)
+        args = generate_render_context(well_title=well.type.title)
+        result = view.render_to_response(args)
+        self.assertInContext('well', well, result)

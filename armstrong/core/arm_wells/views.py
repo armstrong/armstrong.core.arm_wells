@@ -2,6 +2,8 @@ from django.core.exceptions import ImproperlyConfigured
 from django.views.generic import TemplateView
 from django.utils.translation import ugettext as _
 
+from .models import Well
+
 
 class SimpleWellView(TemplateView):
     def render_to_response(self, context, **response_kwargs):
@@ -17,6 +19,9 @@ class SimpleWellView(TemplateView):
 
         if not 'well_title' in context['params']:
             raise ImproperlyConfigured(_(u"Expects a `well_title` to be provided"))
+
+        well_title = context['params']['well_title']
+        context['well'] = Well.objects.get_current(title=well_title)
 
         return super(SimpleWellView, self).render_to_response(context,
                 **response_kwargs)

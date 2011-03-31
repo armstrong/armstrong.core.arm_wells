@@ -1,6 +1,6 @@
 import random
 
-from django.test import TestCase
+from django.test import TestCase as DjangoTestCase
 
 from .arm_wells_support.models import Story
 from ..models import Well
@@ -22,3 +22,12 @@ def generate_random_welltype():
     title = "Random Well %d" % r
     slug = "random-well-%d" % r
     return WellType.objects.create(title=title, slug=slug)
+
+
+class TestCase(DjangoTestCase):
+    def assertInContext(self, var_name, other, template_or_context):
+        # TODO: support passing in a straight "context" (i.e., dict)
+        context = template_or_context.context_data
+        self.assertTrue(var_name in context,
+                msg="`%s` not in provided context" % var_name)
+        self.assertEqual(context[var_name], other)
