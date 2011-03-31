@@ -18,7 +18,8 @@ class SimpleWellView(TemplateView):
                 self.template_name = context['params']['template_name']
 
         if not 'well_title' in context['params']:
-            raise ImproperlyConfigured(_(u"Expects a `well_title` to be provided"))
+            raise ImproperlyConfigured(
+                    _(u"Expects a `well_title` to be provided"))
 
         well_title = context['params']['well_title']
         context['well'] = Well.objects.get_current(title=well_title)
