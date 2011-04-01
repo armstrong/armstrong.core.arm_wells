@@ -14,9 +14,12 @@ class SimpleWellView(TemplateView):
             raise ImproperlyConfigured(
                     _(u"Expects a `well_title` to be provided"))
 
+    def get_well(self):
+        return Well.objects.get_current(title=self.well_title)
+
     def get_context_data(self, **kwargs):
         context = super(SimpleWellView, self).get_context_data(**kwargs)
-        context["well"] = Well.objects.get_current(title=self.well_title)
+        context["well"] = self.get_well()
         return context
 
 
