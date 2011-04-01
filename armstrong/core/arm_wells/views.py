@@ -1,5 +1,6 @@
 from django.core.exceptions import ImproperlyConfigured
 from django.views.generic import TemplateView
+from django.views.generic.list import MultipleObjectMixin
 from django.utils.translation import ugettext as _
 
 from .models import Well
@@ -23,11 +24,15 @@ class SimpleWellView(TemplateView):
         return context
 
 
-class QuerySetBackedWellView(SimpleWellView):
-    queryset = None
-
-    def __init__(self, *args, **kwargs):
-        super(QuerySetBackedWellView, self).__init__(*args, **kwargs)
-        if not self.queryset:
-            raise ImproperlyConfigured(
-                    _(u"Expects a `queryset` to be provided"))
+class QuerySetBackedWellView(SimpleWellView, MultipleObjectMixin):
+    def get_queryset(self):
+        # TODO: Fix this so its not crushing the database.
+        #       This is just the first, simplest possible pass to get this
+        #       working for the tests.
+        raw_queryset = super(QuerySetBackedWellView, self).get_queryset()
+        well_content, excluded_ids = [], []
+        for a in self.get_well().nodes.all():
+            well_content.append(a)
+            excluded_ids.append(a.pk)
+        other_content = [a for a in raw_queryset.exclude(pk__in=excluded_ids)]
+        return well_content + other_content

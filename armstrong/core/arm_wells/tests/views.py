@@ -3,7 +3,11 @@ from django.db.models.query import QuerySet
 from django.http import HttpRequest
 from django.test.client import RequestFactory
 import fudge
+import random
 
+from .arm_wells_support.models import Story
+from ._utils import add_n_random_stories_to_well
+from ._utils import generate_random_story
 from ._utils import generate_random_well
 from ._utils import TestCase
 
@@ -57,13 +61,34 @@ class SimpleWellViewTest(WellViewTestCase):
 class QuerySetBackedWellViewTest(SimpleWellViewTest):
     view_class = QuerySetBackedWellView
 
+    def setUp(self):
+        super(QuerySetBackedWellViewTest, self).setUp()
+        self.number_in_well = random.randint(1, 5)
+        add_n_random_stories_to_well(self.number_in_well, self.well)
+
     def default_kwargs(self):
+        queryset = Story.objects.all()
         kwargs = super(QuerySetBackedWellViewTest, self).default_kwargs()
-        kwargs['queryset'] = fudge.Fake(QuerySet)
+        kwargs['queryset'] = queryset
         return kwargs
 
     def test_raises_exception_if_no_queryset_provided(self):
         kwargs = self.default_kwargs()
         del kwargs["queryset"]
-        view = self.view_class.as_view(**kwargs)
-        self.assertRaises(ImproperlyConfigured, view, self.factory.get("/"))
+        view = self.view_class(**kwargs)
+        with self.assertRaises(ImproperlyConfigured) as context_manager:
+            view.get_queryset()
+        expected = u"'%s' must define 'queryset' or 'model'" % (
+                self.view_class.__name__)
+        self.assertEqual(expected, context_manager.exception.message)
+
+    def test_get_queryset_returns_well_and_backed_queryset(self):
+        number_of_stories = random.randint(1, 5)
+        for i in range(number_of_stories):
+            generate_random_story()
+
+        view = self.view_class(**self.default_kwargs())
+
+        queryset = view.get_queryset()
+        expected = number_of_stories + self.number_in_well
+        self.assertEqual(expected, len(queryset))
