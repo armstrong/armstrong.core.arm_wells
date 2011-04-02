@@ -3,6 +3,9 @@ class MergedNodesAndQuerySet(object):
         self.well = well
         self.queryset = queryset
 
+    def __getslice__(self, i, j):
+        return [a.content_object for a in self.well.nodes.all()]
+
     def __len__(self):
         well_nodes = self.well.nodes.all()
         exclude_ids = [a.pk for a in well_nodes]
