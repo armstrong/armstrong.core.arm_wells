@@ -159,6 +159,19 @@ class WellTestCase(TestCase):
 
         self.assertEqual(expected, result)
 
+    def test_combines_a_well_with_another_queryset(self):
+        number_of_stories = random.randint(1, 5)
+        for i in range(number_of_stories):
+            generate_random_story()
+
+        well = generate_random_well()
+        number_in_well = random.randint(1, 5)
+        add_n_random_stories_to_well(number_in_well, well)
+
+        queryset_backed_well = well.merge_with(Story.objects.all())
+        self.assertEqual(number_in_well + number_of_stories,
+                len(queryset_backed_well))
+
 
 class NodeTestCase(TestCase):
     def test_string_representation(self):

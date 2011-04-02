@@ -26,13 +26,5 @@ class SimpleWellView(TemplateView):
 
 class QuerySetBackedWellView(SimpleWellView, MultipleObjectMixin):
     def get_queryset(self):
-        # TODO: Fix this so its not crushing the database.
-        #       This is just the first, simplest possible pass to get this
-        #       working for the tests.
-        raw_queryset = super(QuerySetBackedWellView, self).get_queryset()
-        well_content, excluded_ids = [], []
-        for a in self.get_well().nodes.all():
-            well_content.append(a)
-            excluded_ids.append(a.pk)
-        other_content = [a for a in raw_queryset.exclude(pk__in=excluded_ids)]
-        return well_content + other_content
+        return self.get_well() \
+                .merge_with(super(QuerySetBackedWellView, self).get_queryset())

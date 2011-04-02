@@ -34,6 +34,17 @@ class Well(models.Model):
             self.pub_date = datetime.datetime.now()
         return super(Well, self).save(*args, **kwargs)
 
+    def merge_with(self, queryset):
+        # TODO: Fix this so its not crushing the database.
+        #       This is just the first, simplest possible pass to get this
+        #       working for the tests.
+        well_content, excluded_ids = [], []
+        for a in self.nodes.all():
+            well_content.append(a)
+            excluded_ids.append(a.pk)
+        other_content = [a for a in queryset.exclude(pk__in=excluded_ids)]
+        return well_content + other_content
+
     def render(self, request=None):
         ret = []
         kwargs = {}
