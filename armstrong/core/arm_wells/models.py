@@ -7,6 +7,7 @@ from django.template.loader import render_to_string
 from django.template import TemplateDoesNotExist
 
 from .managers import WellManager
+from .query import MergedNodesAndQuerySet
 
 
 class WellType(models.Model):
@@ -38,12 +39,7 @@ class Well(models.Model):
         # TODO: Fix this so its not crushing the database.
         #       This is just the first, simplest possible pass to get this
         #       working for the tests.
-        well_content, excluded_ids = [], []
-        for a in self.nodes.all():
-            well_content.append(a)
-            excluded_ids.append(a.pk)
-        other_content = [a for a in queryset.exclude(pk__in=excluded_ids)]
-        return well_content + other_content
+        return MergedNodesAndQuerySet(self, queryset)
 
     def render(self, request=None):
         ret = []

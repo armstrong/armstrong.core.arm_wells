@@ -2,6 +2,8 @@ import datetime
 import fudge
 import random
 
+from .arm_wells_support.models import Story
+from ._utils import add_n_random_stories_to_well
 from ._utils import generate_random_story
 from ._utils import generate_random_well
 from ._utils import generate_random_welltype
