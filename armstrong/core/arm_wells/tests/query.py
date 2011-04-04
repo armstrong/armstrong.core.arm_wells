@@ -32,3 +32,8 @@ class MergedNodesAndQuerySetTest(TestCase):
         for back_filled in back_filled_models:
             self.assertTrue(isinstance(back_filled, Story), msg="sanity check")
             self.assertFalse(back_filled in node_models)
+
+    def test_gathers_all_nodes_with_N_plus_1_queries(self):
+        queryset_backed_well = self.well.merge_with(Story.objects.all())
+        with self.assertNumQueries(self.number_in_well + 1):
+            node_models = queryset_backed_well[0:self.number_in_well]
