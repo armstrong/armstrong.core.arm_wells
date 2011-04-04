@@ -10,8 +10,8 @@ from ..models import WellType
 
 
 def generate_random_story():
-    title = "Random title %d" % random.randint(100, 200)
-    body = "Some random text %d" % random.randint(100, 200)
+    title = "Random title %d" % random.randint(1000000, 2000000)
+    body = "Some random text %d" % random.randint(1000000, 2000000)
     return Story.objects.create(title=title, body=body)
 
 
@@ -27,7 +27,7 @@ def add_n_random_stories_to_well(n, well):
 
 
 def generate_random_welltype():
-    r = random.randint(100, 200)
+    r = random.randint(1000000, 2000000)
     title = "Random Well %d" % r
     slug = "random-well-%d" % r
     return WellType.objects.create(title=title, slug=slug)

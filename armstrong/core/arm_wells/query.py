@@ -3,11 +3,17 @@ class MergedNodesAndQuerySet(object):
         self.well = well
         self.queryset = queryset
 
+    def combined(self):
+        total, exclude_ids = [], []
+        for a in self.well.nodes.all():
+            total.append(a.content_object)
+            exclude_ids.append(a.pk)
+        queryset = self.queryset.exclude(pk__in=exclude_ids)
+        total += [a for a in queryset]
+        return total
+
     def __getslice__(self, i, j):
-        return [a.content_object for a in self.well.nodes.all()]
+        return self.combined()[i:j]
 
     def __len__(self):
-        well_nodes = self.well.nodes.all()
-        exclude_ids = [a.pk for a in well_nodes]
-        total = self.queryset.exclude(pk__in=exclude_ids).count()
-        return well_nodes.count() + total
+        return len(self.combined())
