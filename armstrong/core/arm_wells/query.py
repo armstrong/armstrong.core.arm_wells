@@ -23,5 +23,8 @@ class MergedNodesAndQuerySet(object):
                 else self.combined()
         return to_slice[i:j]
 
+    def count(self):
+        return self.__len__()
+
     def __len__(self):
         return len(self.combined())

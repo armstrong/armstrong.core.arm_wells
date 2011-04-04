@@ -19,6 +19,16 @@ class MergedNodesAndQuerySetTest(TestCase):
             self.extra_stories.append(generate_random_story())
         self.queryset_backed_well = self.well.merge_with(Story.objects.all())
 
+    def test_count_returns_total_of_combined_queryset_and_well_nodes(self):
+        expected = self.number_of_extra_stories + self.number_in_well
+        self.assertEqual(expected, self.queryset_backed_well.count())
+
+    def test_count_and_len_are_identical_with_small_queryset(self):
+        # This might not always be the case.  __len__() and count() are
+        # semantically different in QuerySet.
+        self.assertEqual(len(self.queryset_backed_well),
+                self.queryset_backed_well.count())
+
     def test_node_models_are_first(self):
         node_models = [a.content_object for a in self.well.nodes.all()]
         for obj in self.queryset_backed_well[0:self.number_in_well]:
