@@ -37,3 +37,9 @@ class MergedNodesAndQuerySetTest(TestCase):
         queryset_backed_well = self.well.merge_with(Story.objects.all())
         with self.assertNumQueries(self.number_in_well + 1):
             node_models = queryset_backed_well[0:self.number_in_well]
+
+    def test_gathers_nodes_plus_backfill_in_N_plus_2_queries(self):
+        queryset_backed_well = self.well.merge_with(Story.objects.all())
+        with self.assertNumQueries(self.number_in_well + 2):
+            node_models = queryset_backed_well \
+                    [0:self.number_in_well + self.number_of_extra_stories]
