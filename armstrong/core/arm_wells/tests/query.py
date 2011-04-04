@@ -1,3 +1,4 @@
+from django.core.paginator import Paginator
 import random
 
 from .arm_wells_support.models import Story
@@ -39,3 +40,24 @@ class MergedNodesAndQuerySetTest(TestCase):
         with self.assertNumQueries(self.number_in_well + 2):
             node_models = self.queryset_backed_well \
                     [0:self.number_in_well + self.number_of_extra_stories]
+
+    def test_works_with_simple_pagination(self):
+        paged = Paginator(self.queryset_backed_well, self.number_in_well)
+        page_one = paged.page(1)
+        node_models = [a.content_object for a in self.well.nodes.all()]
+        for model in node_models:
+            self.assertTrue(model in page_one.object_list)
+
+        paged = Paginator(self.queryset_backed_well, \
+                self.number_in_well + self.number_of_extra_stories)
+        page_one = paged.page(1)
+        for model in node_models:
+            self.assertTrue(model in page_one.object_list)
+        for story in self.extra_stories:
+            self.assertTrue(story in page_one.object_list)
+
+    def test_pagination_works_when_split_across_well_and_queryset(self):
+        paged = Paginator(self.queryset_backed_well, self.number_in_well + 1)
+        page_one = paged.page(1)
+        node_models = [a.content_object for a in self.well.nodes.all()]
+        self.assertFalse(page_one.object_list[-1] in node_models)
