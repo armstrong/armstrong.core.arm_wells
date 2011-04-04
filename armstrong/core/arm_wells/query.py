@@ -28,3 +28,9 @@ class MergedNodesAndQuerySet(object):
 
     def __len__(self):
         return len(self.combined())
+
+    def __getattr__(self, key):
+        if hasattr(self.queryset, key):
+            raise NotImplementedError()
+        raise AttributeError("%s not an attribute on %s" % (key,
+            self.__class__.__name__))

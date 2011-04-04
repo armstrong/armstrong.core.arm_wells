@@ -19,6 +19,30 @@ class MergedNodesAndQuerySetTest(TestCase):
             self.extra_stories.append(generate_random_story())
         self.queryset_backed_well = self.well.merge_with(Story.objects.all())
 
+    def test_raises_NotImplementedError_on_filter(self):
+        with self.assertRaises(NotImplementedError):
+            self.queryset_backed_well.filter()
+
+    def test_raises_NotImplementedError_on_exclude(self):
+        with self.assertRaises(NotImplementedError):
+            self.queryset_backed_well.exclude()
+
+    def test_raises_NotImplementedError_on_misc_functions(self):
+        funcs_to_test = ['aggregate', 'get', 'create', 'get_or_create',
+                'latest', 'in_bulk', 'delete', 'update', 'exists', 'values',
+                'values_list', 'dates', 'none', 'complex_filter',
+                'select_related', 'dup_select_related', 'annotate', 'order_by',
+                'distinct', 'extra', 'reverse', 'defer', 'only', 'using',
+                'ordered', ]
+        for func in funcs_to_test:
+            with self.assertRaises(NotImplementedError):
+                getattr(self.queryset_backed_well, func)()
+
+    def test_raises_AttributeError_on_unknown_attribute(self):
+        """Necessary because of the NotImplementedError code"""
+        with self.assertRaises(AttributeError):
+            getattr(self.queryset_backed_well, "unknown_and_unknowable")
+
     def test_count_returns_total_of_combined_queryset_and_well_nodes(self):
         expected = self.number_of_extra_stories + self.number_in_well
         self.assertEqual(expected, self.queryset_backed_well.count())
