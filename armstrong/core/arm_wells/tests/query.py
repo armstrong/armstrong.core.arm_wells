@@ -2,8 +2,11 @@ from django.core.paginator import Paginator
 import random
 
 from .arm_wells_support.models import Story
-from ._utils import (add_n_random_stories_to_well, generate_random_story,
-        generate_random_well, TestCase)
+from ._utils import (add_n_random_stories_to_well, add_n_random_images_to_well,
+        generate_random_image, generate_random_story, generate_random_well,
+        TestCase)
+
+from ..models import Node
 
 
 class MergedNodesAndQuerySetTest(TestCase):
@@ -67,14 +70,51 @@ class MergedNodesAndQuerySetTest(TestCase):
             self.assertTrue(isinstance(back_filled, Story), msg="sanity check")
             self.assertFalse(back_filled in node_models)
 
-    def test_gathers_all_nodes_with_N_plus_1_queries(self):
-        with self.assertNumQueries(self.number_in_well + 1):
+    def test_gathers_all_nodes_of_one_type_with_two_queries(self):
+        with self.assertNumQueries(2):
             node_models = self.queryset_backed_well[0:self.number_in_well]
 
-    def test_gathers_nodes_plus_backfill_in_N_plus_2_queries(self):
-        with self.assertNumQueries(self.number_in_well + 2):
-            node_models = self.queryset_backed_well \
-                    [0:self.number_in_well + self.number_of_extra_stories]
+    def test_gathers_all_nodes_of_two_types_with_three_queries(self):
+        add_n_random_images_to_well(self.number_in_well, self.well)
+        with self.assertNumQueries(3):
+            node_models = self.queryset_backed_well[0:self.number_in_well * 2]
+
+        number_of_images, number_of_stories = 0, 0
+        for node_model in node_models:
+            if node_model.__class__.__name__ == "Story":
+                number_of_stories += 1
+            if node_model.__class__.__name__ == "Image":
+                number_of_images += 1
+        self.assertEqual(self.number_in_well, number_of_stories)
+        self.assertEqual(self.number_in_well, number_of_images)
+
+        # Run after the fact to avoid prefetching data
+        self.assertEqual(
+                self.number_of_extra_stories + (self.number_in_well * 2),
+                self.queryset_backed_well.count(),
+                msg="sanity check"
+        )
+
+    def test_perserves_order_across_types(self):
+        well = generate_random_well()
+        content = [generate_random_story(), generate_random_image(),
+                generate_random_story()]
+
+        Node.objects.create(content_object=content[0], order=0, well=well)
+        Node.objects.create(content_object=content[1], order=1, well=well)
+        Node.objects.create(content_object=content[2], order=2, well=well)
+
+        queryset = well.merge_with(Story.objects.all())
+        with self.assertNumQueries(3, msg="sanity check"):
+            node_models = queryset[0:3]
+        self.assertEqual(node_models[0], content[0])
+        self.assertEqual(node_models[1], content[1])
+        self.assertEqual(node_models[2], content[2])
+
+    def test_gathers_nodes_of_one_type_plus_backfill_in_three_queries(self):
+        with self.assertNumQueries(3):
+            end = self.number_in_well + self.number_of_extra_stories
+            node_models = self.queryset_backed_well[0:end]
 
     def test_works_with_simple_pagination(self):
         paged = Paginator(self.queryset_backed_well, self.number_in_well)
