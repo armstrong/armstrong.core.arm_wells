@@ -174,6 +174,11 @@ class WellTestCase(TestCase):
         self.assertEqual(number_in_well + number_of_stories,
                 len(queryset_backed_well))
 
+    def test_title_is_the_same_as_welltype_title(self):
+        well_type = generate_random_welltype()
+        well = Well.objects.create(type=well_type)
+        self.assertEqual(well_type.title, well.title)
+
 
 class NodeTestCase(TestCase):
     def test_string_representation(self):

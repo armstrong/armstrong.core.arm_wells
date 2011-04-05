@@ -26,6 +26,10 @@ class Well(models.Model):
 
     objects = WellManager()
 
+    @property
+    def title(self):
+        return self.type.title
+
     def __unicode__(self):
         return "%s (%s - %s)" % (self.type, self.pub_date,
                                  self.expires or "Never")
