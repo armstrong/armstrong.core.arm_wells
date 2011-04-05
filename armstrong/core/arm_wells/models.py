@@ -79,5 +79,5 @@ class Node(models.Model):
         ordering = ["order"]
 
     def __unicode__(self):
-        return "%s (%d): %s" % (self.well.type.title, self.order,
+        return "%s (%d): %s" % (self.well.title, self.order,
                                 self.content_object)

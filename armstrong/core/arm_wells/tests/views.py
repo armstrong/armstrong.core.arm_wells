@@ -26,7 +26,7 @@ class SimpleWellViewTest(WellViewTestCase):
     def default_kwargs(self):
         return {
             "template_name": "index.html",
-            "well_title": self.well.type.title,
+            "well_title": self.well.title,
         }
 
     def test_raises_exception_without_template_name_param(self):

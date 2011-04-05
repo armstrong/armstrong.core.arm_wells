@@ -188,5 +188,5 @@ class NodeTestCase(TestCase):
         node = Node.objects.create(well=well, content_object=story,
                                    order=order)
 
-        expected = "%s (%d): %s" % (well.type.title, order, story.title)
+        expected = "%s (%d): %s" % (well.title, order, story.title)
         self.assertEqual(expected, str(node))
