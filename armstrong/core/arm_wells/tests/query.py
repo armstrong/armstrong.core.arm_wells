@@ -61,7 +61,8 @@ class MergedNodesAndQuerySetTest(TestCase):
     def test_fills_in_with_queryset_after_nodes_are_exhausted(self):
         node_models = [a.content_object for a in self.well.nodes.all()]
 
-        back_filled_models = self.queryset_backed_well[self.number_in_well+1:]
+        start = self.number_in_well + 1
+        back_filled_models = self.queryset_backed_well[start:]
         for back_filled in back_filled_models:
             self.assertTrue(isinstance(back_filled, Story), msg="sanity check")
             self.assertFalse(back_filled in node_models)
