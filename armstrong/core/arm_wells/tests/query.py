@@ -9,6 +9,18 @@ from ._utils import (add_n_random_stories_to_well, add_n_random_images_to_well,
 from ..models import Node
 
 
+class SimpleMergedNodesAndQuerySetTests(TestCase):
+    """Tests that don't require all of the setup and such"""
+
+    def test_merges_correctly_when_sliced_across_the_well_content(self):
+        well = generate_random_well()
+        stories = [generate_random_story() for i in range(2)]
+        add_n_random_stories_to_well(2, well)
+
+        queryset = well.merge_with(Story.objects.all())
+        sliced = [a for a in queryset[1:3]]
+        self.assertEqual(2, len(sliced))
+
 class MergedNodesAndQuerySetTest(TestCase):
     def setUp(self):
         super(MergedNodesAndQuerySetTest, self).setUp()
