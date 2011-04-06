@@ -43,7 +43,7 @@ class MergedNodesAndQuerySet(object):
         if i >= total_in_well:
             start = i - total_in_well
             return self.queryset.exclude(pk__in=self.exclude_ids)[start:end]
-        return itertools.chain(self.well_content,
+        return itertools.chain(self.well_content[i:],
                 self.queryset.exclude(pk__in=self.exclude_ids)[0:end])
 
     def count(self):
