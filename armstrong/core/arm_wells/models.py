@@ -40,9 +40,6 @@ class Well(models.Model):
         return super(Well, self).save(*args, **kwargs)
 
     def merge_with(self, queryset):
-        # TODO: Fix this so its not crushing the database.
-        #       This is just the first, simplest possible pass to get this
-        #       working for the tests.
         return MergedNodesAndQuerySet(self, queryset)
 
     def render(self, request=None):
