@@ -4,6 +4,7 @@ from ._utils import *
 def pep8():
     local('find ./armstrong -name "*.py" | xargs pep8', capture=False)
 
+
 @task
 def test():
     settings = {
@@ -17,5 +18,5 @@ def test():
         ),
         'ROOT_URLCONF': 'armstrong.core.arm_wells.tests.arm_wells_support.urls',
     }
-    run_tests(settings, 'arm_wells_support', 'arm_wells')
-
+    with html_coverage_report():
+        run_tests(settings, 'arm_wells_support', 'arm_wells')
