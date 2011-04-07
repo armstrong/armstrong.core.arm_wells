@@ -67,7 +67,7 @@ class WellTestCase(TestCase):
         random_return = str(random.randint(1000, 2000))
 
         render_to_string = fudge.Fake(callable=True)
-        context = {"well": well, "object": story}
+        context = {"well": well, "object": story, "parent": None}
         render_to_string.with_args(expected_path, dictionary=context) \
                 .returns(random_return)
 
@@ -97,7 +97,7 @@ class WellTestCase(TestCase):
         RequestContext.with_args(request).returns(mock_context_instance)
 
         render_to_string = fudge.Fake(callable=True)
-        context = {"well": well, "object": story}
+        context = {"well": well, "object": story, "parent": None}
         render_to_string.with_args(expected_path, dictionary=context,
                 context_instance=mock_context_instance).returns(random_return)
 
@@ -155,6 +155,7 @@ class WellTestCase(TestCase):
 
         result = outer_well.render().strip()
         expected = "\n".join(["Story Template",
+            "Parent Well: %s" % outer_type.title,
             "Story: %s" % story.title,
             "Well: %s" % inner_type.title,
             ])

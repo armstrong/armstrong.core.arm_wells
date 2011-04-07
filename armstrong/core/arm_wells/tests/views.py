@@ -20,6 +20,7 @@ class WellViewTestCase(TestCase):
         super(WellViewTestCase, self).setUp()
         self.well = generate_random_well()
 
+
 class SimpleWellViewTest(WellViewTestCase):
     view_class = SimpleWellView
 

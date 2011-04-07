@@ -42,7 +42,7 @@ class Well(models.Model):
     def merge_with(self, queryset):
         return MergedNodesAndQuerySet(self, queryset)
 
-    def render(self, request=None):
+    def render(self, request=None, parent=None):
         ret = []
         kwargs = {}
         if request:
@@ -52,11 +52,12 @@ class Well(models.Model):
             kwargs["dictionary"] = {
                     "well": self,
                     "object": node.content_object,
+                    "parent": parent,
             }
             content = node.content_object
 
             if hasattr(content, "render"):
-                ret.append(content.render(request))
+                ret.append(content.render(request, parent=self))
             else:
                 ret.append(render_to_string("wells/%s/%s/%s.html" % (
                     content._meta.app_label,

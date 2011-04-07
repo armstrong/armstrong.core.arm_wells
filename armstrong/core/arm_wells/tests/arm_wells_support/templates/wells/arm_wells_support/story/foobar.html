@@ -1,4 +1,5 @@
 Story Template
-Story: {{ object.title }}
+{% if parent %}Parent Well: {{ parent.title }}
+{% endif %}Story: {{ object.title }}
 Well: {{ well.title }}
 {% if request %}Got Request!{% endif %}
