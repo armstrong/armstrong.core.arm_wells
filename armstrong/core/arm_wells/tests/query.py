@@ -21,6 +21,7 @@ class SimpleMergedNodesAndQuerySetTests(TestCase):
         sliced = [a for a in queryset[1:3]]
         self.assertEqual(2, len(sliced))
 
+
 class MergedNodesAndQuerySetTest(TestCase):
     def setUp(self):
         super(MergedNodesAndQuerySetTest, self).setUp()
@@ -100,7 +101,6 @@ class MergedNodesAndQuerySetTest(TestCase):
         self.assertEqual(self.number_in_well, number_of_stories)
         self.assertEqual(self.number_in_well, number_of_images)
 
-
     def test_perserves_order_across_types(self):
         well = generate_random_well()
         content = [generate_random_story(), generate_random_image(),
@@ -131,7 +131,7 @@ class MergedNodesAndQuerySetTest(TestCase):
         queryset = well.merge_with(Image.objects.all())
         self.assertEqual(2, len(queryset))
 
-    def test_gathers_nodes_of_one_type_plus_backfill_in_three_queries_total(self):
+    def test_gathers_nodes_of_one_type_plus_backfill_in_3_queries_total(self):
         with self.assertNumQueries(2,
                 msg="only takes two queries to get the slice"):
             end = self.number_in_well + self.number_of_extra_stories
