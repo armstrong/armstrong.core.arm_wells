@@ -65,11 +65,8 @@ class MergedNodesAndQuerySetTest(TestCase):
     def test_count_and_len_are_identical_with_small_queryset(self):
         # This might not always be the case.  __len__() and count() are
         # semantically different in QuerySet.
-        try:
-            self.assertEqual(len(self.queryset_backed_well), len(self.queryset_backed_well))
-        except AssertionError, e:
-            import ipdb;ipdb.set_trace()
-            raise e
+        self.assertEqual(self.queryset_backed_well.count(),
+                len(self.queryset_backed_well))
 
     def test_node_models_are_first(self):
         node_models = [a.content_object for a in self.well.nodes.all()]
