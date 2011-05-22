@@ -10,12 +10,6 @@ class NodeAdmin(VersionAdmin):
     pass
 
 
-class NodeGrappelli(VersionAdmin):
-    related_lookup_fields = [
-        ['content_type', 'object_id', ]
-    ]
-
-
 class NodeInline(admin.TabularInline):
     model = models.Node
     extra = 1
@@ -38,8 +32,6 @@ class WellTypeAdmin(VersionAdmin):
     pass
 
 
-node_admin_class = NodeGrappelli if 'grappelli' in settings.INSTALLED_APPS \
-        else NodeAdmin
-admin.site.register(models.Node, node_admin_class)
+admin.site.register(models.Node, NodeAdmin)
 admin.site.register(models.Well, WellAdmin)
 admin.site.register(models.WellType, WellTypeAdmin)
