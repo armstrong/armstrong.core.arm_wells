@@ -1,6 +1,18 @@
 from distutils.core import setup
 import os
 
+PACKAGE_NAME = "armstrong.core.arm_wells"
+VERSION = ("0", "1", "0", "alpha", "0")
+NAMESPACE_PACKAGES = []
+
+# TODO: simplify this process
+def generate_namespaces(package):
+    new_package = ".".join(package.split(".")[0:-1])
+    if new_package.count(".") > 0:
+        generate_namespaces(new_package)
+    NAMESPACE_PACKAGES.append(new_package)
+generate_namespaces(PACKAGE_NAME)
+
 if os.path.exists("MANIFEST"):
     os.unlink("MANIFEST")
 
@@ -24,7 +36,8 @@ def build_package(dirpath, dirnames, filenames):
             pkg = pkg.replace(os.path.altsep, '.')
         packages.append(pkg)
     elif filenames:
-        prefix = dirpath[10:]  # Strip "armstrong<dir separator>"
+        # Strip off the length of the package name plus the trailing slash
+        prefix = dirpath[len(PACKAGE_NAME) + 1:]
         for f in filenames:
             # Ignore all dot files and any compiled
             if f.startswith(".") or f.endswith(".pyc"):
@@ -33,22 +46,18 @@ def build_package(dirpath, dirnames, filenames):
 
 
 [build_package(dirpath, dirnames, filenames) for dirpath, dirnames, filenames
-        in os.walk('armstrong/core/arm_wells')]
-
+        in os.walk(PACKAGE_NAME.replace(".", "/"))]
 
 setup(
-    name='armstrong.core.arm_wells',
-    version='0.1.0.alpha.0',
+    name=PACKAGE_NAME,
+    version=".".join(VERSION),
     description='Provides the basic content well manipulation',
     author='Bay Citizen & Texas Tribune',
     author_email='info@armstrongcms.org',
     url='http://github.com/armstrongcms/armstrong.core.arm_wells/',
     packages=packages,
-    package_data={
-        "armstrong": data_files,
-        "": ["README.rst", ],
-    },
-    namespace_packages=["armstrong", "armstrong.core", ],
+    package_data={PACKAGE_NAME: data_files, },
+    namespace_packages=NAMESPACE_PACKAGES,
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Environment :: Web Environment',
