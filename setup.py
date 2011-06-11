@@ -2,7 +2,7 @@ from distutils.core import setup
 import os
 
 PACKAGE_NAME = "armstrong.core.arm_wells"
-VERSION = ("0", "1", "0")
+VERSION = ("0", "1", "0", "1")
 NAMESPACE_PACKAGES = []
 
 # TODO: simplify this process
