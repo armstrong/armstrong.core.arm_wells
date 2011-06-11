@@ -54,7 +54,7 @@ setup(
     description='Provides the basic content well manipulation',
     author='Bay Citizen & Texas Tribune',
     author_email='info@armstrongcms.org',
-    url='http://github.com/armstrongcms/armstrong.core.arm_wells/',
+    url='http://github.com/armstrong/armstrong.core.arm_wells/',
     packages=packages,
     package_data={PACKAGE_NAME: data_files, },
     namespace_packages=NAMESPACE_PACKAGES,
