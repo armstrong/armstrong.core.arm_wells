@@ -1,5 +1,5 @@
-armstrong.core.well
-===================
+armstrong.core.arm_wells
+========================
 Provides the basic content well code necessary for scheduling models
 inside ArmstrongCMS.
 
@@ -17,7 +17,8 @@ Installation
 
 ::
 
-    pip install -e git://github.com/texastribune.org/armstrong.core.well
+    NAME=armstrong.core.arm_wells
+    pip install -e git://github.com/armstrong/$NAME.git#egg=$NAME
 
 
 Contributing
