@@ -45,7 +45,7 @@ class MergedNodesAndQuerySetTest(TestCase):
 
     def test_raises_NotImplementedError_on_misc_functions(self):
         funcs_to_test = ['aggregate', 'get', 'create', 'get_or_create',
-                'latest', 'in_bulk', 'delete', 'update', 'exists', 'values',
+                'latest', 'in_bulk', 'update', 'exists', 'values',
                 'values_list', 'dates', 'none', 'complex_filter',
                 'select_related', 'dup_select_related', 'annotate', 'order_by',
                 'distinct', 'extra', 'reverse', 'defer', 'only', 'using',
