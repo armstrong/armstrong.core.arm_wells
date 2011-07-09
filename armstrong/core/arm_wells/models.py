@@ -28,6 +28,12 @@ class Well(models.Model):
 
     objects = WellManager()
 
+    def __init__(self, *args, **kwargs):
+        super(Well, self).__init__(*args, **kwargs)
+        self.queryset = None
+        self.well_content = []
+        self.exclude_ids = []
+
     @property
     def title(self):
         return self.type.title
@@ -48,66 +54,91 @@ class Well(models.Model):
         return self
 
     def render(self, request=None, parent=None):
-        ret = []
-        kwargs = {}
-        if request:
-            kwargs['context_instance'] = RequestContext(request)
-
-        for node in self.nodes.all():
-            kwargs["dictionary"] = {
-                    "well": self,
-                    "object": node.content_object,
-                    "parent": parent,
-            }
-            content = node.content_object
-
-            if hasattr(content, "render"):
-                ret.append(content.render(request, parent=self))
-            else:
-                ret.append(render_to_string("wells/%s/%s/%s.html" % (
-                    content._meta.app_label,
-                    content._meta.object_name.lower(),
-                    self.type.slug), **kwargs))
-        return mark_safe(''.join(ret))
+        if parent is None:
+            parent = self
+        kwargs = {'parent': parent,
+                  'request': request}
+        return mark_safe(''.join(n.render(**kwargs) for n in self))
 
     def initialize(self):
         if self.well_content:
             return
 
-        well_managers = {}
-        for node in self.nodes.all().select_related():
-            model_class = node.content_type.model_class()
-            key = "%s.%s" % (model_class.__module__, node.content_type.model)
-            if not key in well_managers:
-                well_managers[key] = {
-                        "name": node.content_type.model,
-                        "manager": model_class.objects,
-                        "object_ids": [],
-                }
-            self.well_content.append((node.content_type.model, node.object_id))
-            well_managers[key]["object_ids"].append(node.object_id)
-            if self.queryset.model is model_class:
-                self.exclude_ids.append(node.object_id)
-        self.queryset = self.queryset.exclude(pk__in=self.exclude_ids)
+        def process_well(well, managers, ordering):
+            for node in well.nodes.all().select_related():
+                i = len(ordering)
+                model_class = node.content_type.model_class()
+                if model_class == Well:
+                    managers, ordering = process_well(node.content_object,
+                            managers, ordering)
+                    continue
+                key = "%s.%s" % (model_class.__module__, node.content_type.model)
+                if not key in managers:
+                    managers[key] = {
+                            "name": node.content_type.model,
+                            "manager": model_class.objects,
+                            "object_ids": [],
+                    }
+                node_key = "%s.%i" % (node.content_type.model, node.object_id)
+                ordering[node_key] = i, well
+                managers[key]["object_ids"].append(node.object_id)
+                if self.queryset is not None and self.queryset.model is model_class:
+                    self.exclude_ids.append(node.object_id)
+            return managers, ordering
 
+        # well_managers {'module.model':name, manager, ids}
+        self.exclude_ids = []
+        well_managers, ordering = process_well(self, {}, {})
+        self.well_content = [i for i in range(len(ordering))]
+
+        # at this point we know all the queries we need to run to fetch all
+        # content
         for model_data in well_managers.values():
             node_content = model_data["manager"].filter(
                     pk__in=model_data["object_ids"])
             for content in node_content:
-                idx = self.well_content.index((model_data["name"], content.pk))
-                self.well_content[idx] = content
+                node_key = "%s.%i" % (model_data['name'], content.id)
+                idx, well = ordering[node_key]
+                self.well_content[idx] = content, well
+
+        if self.queryset is not None:
+            self.queryset = self.queryset.exclude(pk__in=self.exclude_ids)
+
+
+
+    def __iter__(self):
+        self.initialize()
+        for content, well in self.well_content:
+            yield NodeWrapper(well=well, content_object=content)
+        if self.queryset is not None:
+            for item in self.queryset:
+                yield NodeWrapper(well=self, content_item=item)
 
     def __getslice__(self, i, j):
         self.initialize()
         total_in_well = len(self.well_content)
         if j <= total_in_well:
-            return self.well_content[i:j]
+            return [NodeWrapper(*args) for args in self.well_content[i:j]]
         end = j - total_in_well
         if i >= total_in_well:
             start = i - total_in_well
-            return self.queryset[start:end]
-        return itertools.chain(self.well_content[i:],
-                self.queryset[0:end])
+            return [NodeWrapper(content, self) for content in self.queryset[start:end]]
+        end = j - total_in_well
+        return itertools.chain(
+                (NodeWrapper(*args) for args in self.well_content[i:]),
+                (NodeWrapper(content, self) for content in self.queryset[0:end]))
+
+    def __getitem__(self, i):
+        if type(i) != type(1):
+            raise TypeError
+        self.initialize()
+        con_length = len(self.well_content)
+        if i < con_length:
+            return NodeWrapper(*(self.well_content[i]))
+        elif self.queryset:
+            return NodeWrapper(self.queryset[i-con_length], self)
+        else:
+            raise IndexError
 
     def count(self):
         return self.__len__()
@@ -129,7 +160,25 @@ class Well(models.Model):
             raise
 
 
-class Node(models.Model):
+class NodeRenderMixin(object):
+    def render(self, request=None, parent=None):
+        render_args = {
+                'dictionary':{
+                    "well": self.well,
+                    "object": self.content_object,
+                    "parent": parent,
+                },
+            }
+        if parent == self.well:
+            render_args['dictionary']['parent'] = None
+        if request:
+            render_args['context_instance'] = RequestContext(request)
+        return render_to_string("wells/%s/%s/%s.html" % (
+                                self.content_object._meta.app_label,
+                                self.content_object._meta.object_name.lower(),
+                                self.well.type.slug), **render_args)
+
+class Node(NodeRenderMixin, models.Model):
     well = models.ForeignKey(Well, related_name="nodes")
     order = models.IntegerField(default=0)
     content_type = models.ForeignKey(ContentType)
@@ -143,4 +192,11 @@ class Node(models.Model):
         return "%s (%d): %s" % (self.well.title, self.order,
                                 self.content_object)
 
+class NodeWrapper(NodeRenderMixin):
+    def __init__(self, content_object, well):
+        self.well = well
+        self.content_object = content_object
+
+    def __unicode__(self):
+        return "%s: %s" % (self.well.title, self.content_object)
 

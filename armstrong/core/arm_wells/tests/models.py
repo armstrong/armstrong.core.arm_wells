@@ -207,7 +207,7 @@ class WellTestCase(TestCase):
         add_n_random_stories_to_well(number_in_well, well)
         i = 0
         for node in well.nodes.all():
-            self.assertEqual(node, well[i])
+            self.assertEqual(node.content_object, well[i].content_object)
             i = i + 1
 
     def test_well_supports_indexing_with_merged_queryset(self):
@@ -221,7 +221,7 @@ class WellTestCase(TestCase):
         add_n_random_stories_to_well(number_in_well, well)
         i = 0
         for node in well.nodes.all():
-            self.assertEqual(node, well[i])
+            self.assertEqual(node.content_object, well[i].content_object)
             i = i + 1
 
 
