@@ -148,8 +148,7 @@ class WellTestCase(TestCase):
         outer_well = Well.objects.create(type=outer_type)
         inner_type = WellType.objects.create(title="foobar", slug="foobar")
         inner_well = Well.objects.create(type=inner_type)
-        well_node = Node.objects.create(well=outer_well,
-                                        content_object=inner_well)
+        well_node = Node.objects.create(well=outer_well, content_object=inner_well)
         story = generate_random_story()
         story_node = Node.objects.create(well=inner_well, content_object=story)
 
@@ -189,8 +188,35 @@ class WellTestCase(TestCase):
             i = i + 1
         self.assertEqual(i, number_in_well)
 
+    def test_well_is_iterable_with_merged_queryset(self):
+        number_of_stories = random.randint(1, 5)
+        for i in range(number_of_stories):
+            generate_random_story()
+
+        well = generate_random_well()
+        number_in_well = random.randint(1, 5)
+        add_n_random_stories_to_well(number_in_well, well)
+        i = 0
+        for story in well:
+            i = i + 1
+        self.assertEqual(i, number_in_well)
+
     def test_well_supports_indexing(self):
         well = generate_random_well()
+        number_in_well = random.randint(1, 5)
+        add_n_random_stories_to_well(number_in_well, well)
+        i = 0
+        for node in well.nodes.all():
+            self.assertEqual(node, well[i])
+            i = i + 1
+
+    def test_well_supports_indexing_with_merged_queryset(self):
+        number_of_stories = random.randint(1, 5)
+        for i in range(number_of_stories):
+            generate_random_story()
+
+        well = generate_random_well()
+        well
         number_in_well = random.randint(1, 5)
         add_n_random_stories_to_well(number_in_well, well)
         i = 0
