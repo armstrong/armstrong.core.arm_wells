@@ -180,6 +180,24 @@ class WellTestCase(TestCase):
         well = Well.objects.create(type=well_type)
         self.assertEqual(well_type.title, well.title)
 
+    def test_well_is_iterable(self):
+        well = generate_random_well()
+        number_in_well = random.randint(1, 5)
+        add_n_random_stories_to_well(number_in_well, well)
+        i = 0
+        for story in well:
+            i = i + 1
+        self.assertEqual(i, number_in_well)
+
+    def test_well_supports_indexing(self):
+        well = generate_random_well()
+        number_in_well = random.randint(1, 5)
+        add_n_random_stories_to_well(number_in_well, well)
+        i = 0
+        for node in well.nodes.all():
+            self.assertEqual(node, well[i])
+            i = i + 1
+
 
 class NodeTestCase(TestCase):
     def test_string_representation(self):
