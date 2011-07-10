@@ -109,10 +109,10 @@ class Well(models.Model):
     def __iter__(self):
         self.initialize()
         for content, well in self.well_content:
-            yield NodeWrapper(well=well, content_object=content)
+            yield NodeWrapper(content_object=content, well=well)
         if self.queryset is not None:
             for item in self.queryset:
-                yield NodeWrapper(well=self, content_item=item)
+                yield NodeWrapper(content_item=item, well=self)
 
     def __getslice__(self, i, j):
         self.initialize()
