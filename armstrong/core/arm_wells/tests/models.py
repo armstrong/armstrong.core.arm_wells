@@ -225,6 +225,42 @@ class WellTestCase(TestCase):
             i = i + 1
 
 
+class NestedWellTestCase(TestCase):
+    def setUp(self):
+        self.well = generate_random_well()
+        inner = generate_random_well()
+        Node.objects.create(well=self.well, content_object=inner)
+        self.number_in_well = random.randint(1, 5)
+        self.number_in_inner_well = random.randint(1, 5)
+        add_n_random_stories_to_well(self.number_in_well, self.well)
+        add_n_random_stories_to_well(self.number_in_inner_well, inner)
+        self.inner = inner
+
+    def test_indexing_with_nested_well(self):
+        nodes = self.well.nodes.all()
+        inner_nodes = self.inner.nodes.all()
+
+        for i in range(self.number_in_inner_well):
+            self.assertEqual(inner_nodes[i].content_object,
+                    self.well[i].content_object)
+        for i in range(self.number_in_well):
+            self.assertEqual(nodes[i+1].content_object,
+                    self.well[i+self.number_in_inner_well].content_object)
+
+    def test_iterating_with_nested_well(self):
+        nodes = self.well.nodes.all()
+        inner_nodes = self.inner.nodes.all()
+        i = 0
+        for node in self.well:
+            if i < self.number_in_inner_well:
+                self.assertEqual(inner_nodes[i].content_object,
+                        node.content_object)
+            else:
+                self.assertEqual(nodes[i-self.number_in_inner_well+1].content_object,
+                        node.content_object)
+            i = i+1
+
+
 class NodeTestCase(TestCase):
     def test_string_representation(self):
         story = generate_random_story()
