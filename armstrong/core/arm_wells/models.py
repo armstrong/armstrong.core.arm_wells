@@ -68,6 +68,8 @@ class Well(models.Model):
             for node in well.nodes.all().select_related():
                 i = len(ordering)
                 model_class = node.content_type.model_class()
+                # we recurse into any child wells to flatten everything with
+                # the minimum number of queries
                 if model_class == Well:
                     managers, ordering = process_well(node.content_object,
                             managers, ordering)
@@ -89,7 +91,7 @@ class Well(models.Model):
         # well_managers {'module.model':name, manager, ids}
         self.exclude_ids = []
         well_managers, ordering = process_well(self, {}, {})
-        self.well_content = [i for i in range(len(ordering))]
+        self.well_content = [None] * len(ordering)
 
         # at this point we know all the queries we need to run to fetch all
         # content
@@ -112,7 +114,7 @@ class Well(models.Model):
             yield NodeWrapper(content_object=content, well=well)
         if self.queryset is not None:
             for item in self.queryset:
-                yield NodeWrapper(content_item=item, well=self)
+                yield NodeWrapper(content_object=item, well=self)
 
     def __getslice__(self, i, j):
         self.initialize()
