@@ -26,10 +26,9 @@ class SimpleWellView(TemplateView):
 
 class QuerySetBackedWellView(SimpleWellView, MultipleObjectMixin):
     def get_queryset(self):
-        return self.get_well() \
-                .merge_with(super(QuerySetBackedWellView, self).get_queryset())
+        return self.get_well()
 
     def get_well(self):
-        return Well.objects.get_current(title=self.well_title)\
-                .merge_with(self.get_queryset())
+        return super(QuerySetBackedWellView, self).get_well()\
+                .merge_with(self.queryset)
 
