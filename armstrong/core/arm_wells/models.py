@@ -78,7 +78,10 @@ class Well(models.Model):
                 if not key in managers:
                     managers[key] = {
                             "name": node.content_type.model,
-                            "manager": model_class.objects,
+                            # _default_manager is undocumented. If django ever
+                            # changes/documents a way to get the default
+                            # manager, this will need to change too
+                            "manager": model_class._default_manager,
                             "object_ids": [],
                     }
                 node_key = "%s.%i" % (node.content_type.model, node.object_id)
