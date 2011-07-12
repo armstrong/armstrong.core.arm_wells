@@ -3,7 +3,7 @@ import random
 from django.test import TestCase as DjangoTestCase
 from django.test.client import RequestFactory
 
-from .arm_wells_support.models import Story, Image
+from .arm_wells_support.models import Story, StoryChild, Image
 from ..models import Node
 from ..models import Well
 from ..models import WellType
@@ -13,6 +13,13 @@ def generate_random_image():
     title = "Random Image %d" % random.randint(1000000, 2000000)
     url = "http://example.com/%d" % random.randint(1000000, 2000000)
     return Image.objects.create(title=title, url=url)
+
+
+def generate_random_story_child():
+    title = "Random title %d" % random.randint(1000000, 2000000)
+    body = "Some random text %d" % random.randint(1000000, 2000000)
+    comment = "Some random comment %d" % random.randint(1000000, 2000000)
+    return StoryChild.objects.create(title=title, body=body, comment=comment)
 
 
 def generate_random_story():

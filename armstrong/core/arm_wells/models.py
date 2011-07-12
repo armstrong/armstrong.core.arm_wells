@@ -3,7 +3,8 @@ from django.db import models
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 from django.template import RequestContext
-from django.template.loader import render_to_string
+from django.template.base import Context
+from django.template.loader import select_template
 from django.template import TemplateDoesNotExist
 from django.utils.safestring import mark_safe
 
@@ -56,8 +57,12 @@ class Well(models.Model):
     def render(self, request=None, parent=None):
         if parent is None:
             parent = self
+        if request is not None:
+            context = RequestContext(request)
+        else:
+            context = Context()
         kwargs = {'parent': parent,
-                  'request': request}
+                  'context': context}
         return mark_safe(''.join(n.render(**kwargs) for n in self))
 
     def initialize(self):
@@ -166,22 +171,33 @@ class Well(models.Model):
 
 
 class NodeRenderMixin(object):
-    def render(self, request=None, parent=None):
-        render_args = {
-                'dictionary':{
+    def _template_iter(self):
+        for klass in self.content_object.__class__.mro():
+            if hasattr(klass, '_meta'):
+                yield "wells/%s/%s/%s.html" % (
+                        klass._meta.app_label,
+                        klass._meta.object_name.lower(),
+                        self.well.type.slug)
+        yield "wells/default/%s.html" % self.well.type.slug
+
+    def template(self):
+        return select_template(self._template_iter())
+
+    def render(self, context=None, parent=None):
+        template = self.template()
+        dictionary = {
                     "well": self.well,
                     "object": self.content_object,
                     "parent": parent,
-                },
-            }
+                }
         if parent == self.well:
-            render_args['dictionary']['parent'] = None
-        if request:
-            render_args['context_instance'] = RequestContext(request)
-        return render_to_string("wells/%s/%s/%s.html" % (
-                                self.content_object._meta.app_label,
-                                self.content_object._meta.object_name.lower(),
-                                self.well.type.slug), **render_args)
+            dictionary['parent'] = None
+        if context is None:
+            context = Context()
+        context.update(dictionary)
+        result = template.render(context)
+        context.pop()
+        return result
 
 class Node(NodeRenderMixin, models.Model):
     well = models.ForeignKey(Well, related_name="nodes")

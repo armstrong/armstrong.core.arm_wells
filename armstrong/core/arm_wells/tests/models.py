@@ -1,10 +1,13 @@
 import datetime
 import fudge
+from fudge.inspector import arg
 import random
 
 from .arm_wells_support.models import Story
 from ._utils import add_n_random_stories_to_well
 from ._utils import generate_random_story
+from ._utils import generate_random_image
+from ._utils import generate_random_story_child
 from ._utils import generate_random_well
 from ._utils import generate_random_welltype
 from ._utils import TestCase
@@ -13,6 +16,8 @@ from ..models import Node
 from ..models import Well
 from ..models import WellType
 from .. import models
+
+from django.template.context import Context
 
 
 class WellTestCase(TestCase):
@@ -66,13 +71,19 @@ class WellTestCase(TestCase):
                 story._meta.object_name.lower(), title)
         random_return = str(random.randint(1000, 2000))
 
-        render_to_string = fudge.Fake(callable=True)
-        context = {"well": well, "object": story, "parent": None}
-        render_to_string.with_args(expected_path, dictionary=context) \
-                .returns(random_return)
+        select_template = fudge.Fake(callable=True)
+        fake_template = fudge.Fake()
+        dictionary = {"well": well, "object": story, "parent": None}
+        def context_has(context):
+            for k, v in dictionary.items():
+                self.assertEqual(v, context[k])
+            return True
 
-        with fudge.patched_context(models, "render_to_string",
-                render_to_string):
+        select_template.returns(fake_template)
+        fake_template.provides("render").with_args(arg.passes_test(context_has)).returns(random_return)
+
+        with fudge.patched_context(models, "select_template",
+                select_template):
             result = well.render()
 
             self.assertEqual(result, random_return,
@@ -91,18 +102,20 @@ class WellTestCase(TestCase):
 
         # doesn't really matter what it is, just that its the result of
         # RequestContext being invoked
-        mock_context_instance = random.randint(1000, 2000)
+        mock_context_instance = fudge.Fake().is_a_stub()
         request = fudge.Fake()
         RequestContext = fudge.Fake(callable=True)
         RequestContext.with_args(request).returns(mock_context_instance)
 
-        render_to_string = fudge.Fake(callable=True)
-        context = {"well": well, "object": story, "parent": None}
-        render_to_string.with_args(expected_path, dictionary=context,
-                context_instance=mock_context_instance).returns(random_return)
+        select_template = fudge.Fake(callable=True)
+        fake_template = fudge.Fake()
+        dictionary = {"well": well, "object": story, "parent": None}
 
-        with fudge.patched_context(models, "render_to_string",
-                render_to_string):
+        select_template.returns(fake_template)
+        fake_template.provides("render").with_args(mock_context_instance).returns(random_return)
+
+        with fudge.patched_context(models, "select_template",
+                select_template):
             with fudge.patched_context(models, "RequestContext",
                     RequestContext):
                 result = well.render(request)
@@ -133,6 +146,36 @@ class WellTestCase(TestCase):
         result = well.render([123]).strip()
         expected = "\n".join(["Story Template",
             "Story: %s" % story.title,
+            "Well: %s" % type.title,
+            "Got Request!",
+            ])
+
+        self.assertEqual(expected, result)
+
+    def test_render_loads_template_for_super_type_if_type_has_no_template(self):
+        type = WellType.objects.create(title="Foobar", slug="foobar")
+        well = Well.objects.create(type=type)
+        story_child = generate_random_story_child()
+        node = Node.objects.create(well=well, content_object=story_child)
+
+        result = well.render([123]).strip()
+        expected = "\n".join(["Story Template",
+            "Story: %s" % story_child.title,
+            "Well: %s" % type.title,
+            "Got Request!",
+            ])
+
+        self.assertEqual(expected, result)
+
+    def test_render_loads_default_template(self):
+        type = WellType.objects.create(title="Foobar", slug="foobar")
+        well = Well.objects.create(type=type)
+        image = generate_random_image()
+        node = Node.objects.create(well=well, content_object=image)
+
+        result = well.render([123]).strip()
+        expected = "\n".join(["Foobar Default",
+            "Title: %s" % image.title,
             "Well: %s" % type.title,
             "Got Request!",
             ])
