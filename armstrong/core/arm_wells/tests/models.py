@@ -13,6 +13,7 @@ from ._utils import generate_random_welltype
 from ._utils import TestCase
 
 from ..models import Node
+from ..models import NodeWrapper
 from ..models import Well
 from ..models import WellType
 from .. import models
@@ -254,6 +255,7 @@ class WellTestCase(TestCase):
         for node in well.nodes.all():
             self.assertEqual(node.content_object, well[i].content_object)
             i = i + 1
+        self.assertRaises(IndexError, lambda:well[i])
 
     def test_well_supports_indexing_with_merged_queryset(self):
         number_of_stories = random.randint(1, 5)
@@ -327,3 +329,28 @@ class NodeTestCase(TestCase):
 
         expected = "%s (%d): %s" % (well.title, order, story.title)
         self.assertEqual(expected, str(node))
+
+    def test_render_outside_of_well(self):
+        story = generate_random_story()
+        type = WellType.objects.create(title="Foobar", slug="foobar")
+        well = Well.objects.create(type=type)
+        order = random.randint(100, 200)
+        node = Node.objects.create(well=well, content_object=story,
+                                   order=order)
+        expected = u"\n".join(["Story Template",
+            "Story: %s" % story.title,
+            "Well: %s" % well.title,
+            '',
+            '',
+            ])
+        self.assertEqual(expected, node.render())
+
+class NodeWrapperTestCase(TestCase):
+    def test_string_representation(self):
+        story = generate_random_story()
+        well = generate_random_well()
+        node_wrapper = NodeWrapper(well=well, content_object=story)
+
+        expected = "%s: %s" % (well.title, story.title)
+        self.assertEqual(expected, str(node_wrapper))
+

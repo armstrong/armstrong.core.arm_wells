@@ -210,7 +210,7 @@ class Node(NodeRenderMixin, models.Model):
         ordering = ["order"]
 
     def __unicode__(self):
-        return "%s (%d): %s" % (self.well.title, self.order,
+        return u"%s (%d): %s" % (self.well.title, self.order,
                                 self.content_object)
 
 class NodeWrapper(NodeRenderMixin):
@@ -219,5 +219,8 @@ class NodeWrapper(NodeRenderMixin):
         self.content_object = content_object
 
     def __unicode__(self):
-        return "%s: %s" % (self.well.title, self.content_object)
+        return u"%s: %s" % (self.well.title, self.content_object)
+
+    def __str__(self):
+        return self.__unicode__()
 
