@@ -148,7 +148,7 @@ class Well(models.Model):
         elif self.queryset:
             return NodeWrapper(self.queryset[i-con_length], self)
         else:
-            raise IndexError
+            raise IndexError("list index out of range")
 
     def count(self):
         return self.__len__()

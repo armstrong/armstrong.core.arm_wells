@@ -239,10 +239,12 @@ class WellTestCase(TestCase):
         well = generate_random_well()
         number_in_well = random.randint(1, 5)
         add_n_random_stories_to_well(number_in_well, well)
+
+        well.merge_with(Story.objects.all())
         i = 0
         for story in well:
             i = i + 1
-        self.assertEqual(i, number_in_well)
+        self.assertEqual(i, number_in_well + number_of_stories)
 
     def test_well_supports_indexing(self):
         well = generate_random_well()
@@ -259,13 +261,24 @@ class WellTestCase(TestCase):
             generate_random_story()
 
         well = generate_random_well()
-        well
         number_in_well = random.randint(1, 5)
         add_n_random_stories_to_well(number_in_well, well)
+        qs = Story.objects.all()
+        well.merge_with(qs)
         i = 0
+        # querysets are filtered to prevent duplicate objects, so we need to
+        # keep track of the objects we've already seen
+        used_objects = {}
         for node in well.nodes.all():
             self.assertEqual(node.content_object, well[i].content_object)
+            used_objects[node.content_object.id] = 1
             i = i + 1
+        for story in qs:
+            if story.id in used_objects:
+                continue
+            self.assertEqual(story, well[i].content_object)
+            i = i + 1
+        self.assertRaises(IndexError, lambda:well[i])
 
 
 class NestedWellTestCase(TestCase):
