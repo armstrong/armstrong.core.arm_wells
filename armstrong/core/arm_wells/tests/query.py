@@ -132,13 +132,9 @@ class MergedNodesAndQuerySetTest(TestCase):
         self.assertEqual(2, len(queryset))
 
     def test_gathers_nodes_of_one_type_plus_backfill_in_3_queries_total(self):
-        with self.assertNumQueries(2,
-                msg="only takes two queries to get the slice"):
+        with self.assertNumQueries(3):
             end = self.number_in_well + self.number_of_extra_stories
             node_models = self.queryset_backed_well[0:end]
-
-        with self.assertNumQueries(1,
-                msg="queryset is run only when actually iterated over"):
             [a for a in node_models]
 
     def test_works_with_simple_pagination(self):

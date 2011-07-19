@@ -1,5 +1,6 @@
 import datetime
 from django.db import models
+from django.db.models.query import QuerySet
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 from django.template import RequestContext
@@ -9,6 +10,7 @@ from django.template import TemplateDoesNotExist
 from django.utils.safestring import mark_safe
 
 from .managers import WellManager
+from .querysets import MergeQuerySet, GenericForeignKeyQuerySet
 
 import itertools
 
@@ -32,8 +34,6 @@ class Well(models.Model):
     def __init__(self, *args, **kwargs):
         super(Well, self).__init__(*args, **kwargs)
         self.queryset = None
-        self.well_content = []
-        self.exclude_ids = []
 
     @property
     def title(self):
@@ -48,126 +48,33 @@ class Well(models.Model):
             self.pub_date = datetime.datetime.now()
         return super(Well, self).save(*args, **kwargs)
 
+    @property
+    def content_items(self):
+        node_qs = GenericForeignKeyQuerySet(self.nodes.all().select_related())
+        if self.queryset is None:
+            return node_qs
+        else:
+            return MergeQuerySet(node_qs, self.queryset)
+
+    @property
+    def items(self):
+        return NodeWrapperQuerySet(self.content_items, self)
+
     def merge_with(self, queryset):
         self.queryset = queryset
-        self.well_content = []
-        self.exclude_ids = []
-        return self
+        return self.items
 
-    def render(self, request=None, parent=None):
+    def render(self, request=None, parent=None, context=None):
         if parent is None:
             parent = self
-        if request is not None:
-            context = RequestContext(request)
-        else:
-            context = Context()
+        if context is None:
+            if request is not None:
+                context = RequestContext(request)
+            else:
+                context = Context()
         kwargs = {'parent': parent,
                   'context': context}
-        return mark_safe(''.join(n.render(**kwargs) for n in self))
-
-    def initialize(self):
-        if self.well_content:
-            return
-
-        def process_well(well, managers, ordering):
-            for node in well.nodes.all().select_related():
-                i = len(ordering)
-                model_class = node.content_type.model_class()
-                # we recurse into any child wells to flatten everything with
-                # the minimum number of queries
-                if model_class == Well:
-                    managers, ordering = process_well(node.content_object,
-                            managers, ordering)
-                    continue
-                key = "%s.%s" % (model_class.__module__, node.content_type.model)
-                if not key in managers:
-                    managers[key] = {
-                            "name": node.content_type.model,
-                            # _default_manager is undocumented. If django ever
-                            # changes/documents a way to get the default
-                            # manager, this will need to change too
-                            "manager": model_class._default_manager,
-                            "object_ids": [],
-                    }
-                node_key = "%s.%i" % (node.content_type.model, node.object_id)
-                ordering[node_key] = i, well
-                managers[key]["object_ids"].append(node.object_id)
-                if self.queryset is not None and self.queryset.model is model_class:
-                    self.exclude_ids.append(node.object_id)
-            return managers, ordering
-
-        # well_managers {'module.model':name, manager, ids}
-        self.exclude_ids = []
-        well_managers, ordering = process_well(self, {}, {})
-        self.well_content = [None] * len(ordering)
-
-        # at this point we know all the queries we need to run to fetch all
-        # content
-        for model_data in well_managers.values():
-            node_content = model_data["manager"].filter(
-                    pk__in=model_data["object_ids"])
-            for content in node_content:
-                node_key = "%s.%i" % (model_data['name'], content.id)
-                idx, well = ordering[node_key]
-                self.well_content[idx] = content, well
-
-        if self.queryset is not None:
-            self.queryset = self.queryset.exclude(pk__in=self.exclude_ids)
-
-
-
-    def __iter__(self):
-        self.initialize()
-        for content, well in self.well_content:
-            yield NodeWrapper(content_object=content, well=well)
-        if self.queryset is not None:
-            for item in self.queryset:
-                yield NodeWrapper(content_object=item, well=self)
-
-    def __getslice__(self, i, j):
-        self.initialize()
-        total_in_well = len(self.well_content)
-        if j <= total_in_well:
-            return [NodeWrapper(*args) for args in self.well_content[i:j]]
-        end = j - total_in_well
-        if i >= total_in_well:
-            start = i - total_in_well
-            return [NodeWrapper(content, self) for content in self.queryset[start:end]]
-        end = j - total_in_well
-        return itertools.chain(
-                (NodeWrapper(*args) for args in self.well_content[i:]),
-                (NodeWrapper(content, self) for content in self.queryset[0:end]))
-
-    def __getitem__(self, i):
-        if type(i) != type(1):
-            raise TypeError
-        self.initialize()
-        con_length = len(self.well_content)
-        if i < con_length:
-            return NodeWrapper(*(self.well_content[i]))
-        elif self.queryset:
-            return NodeWrapper(self.queryset[i-con_length], self)
-        else:
-            raise IndexError("list index out of range")
-
-    def count(self):
-        return self.__len__()
-
-    def __len__(self):
-        self.initialize()
-        return len(self.well_content) + \
-                self.queryset.count()
-
-    def __nonzero__(self):
-        return True
-
-    def __getattr__(self, key):
-        try:
-            return getattr(super(Well, self), key)
-        except AttributeError:
-            if key != 'queryset' and self.queryset is not None and hasattr(self.queryset, key):
-                raise NotImplementedError()
-            raise
+        return mark_safe(''.join(n.render(**kwargs) for n in self.items))
 
 
 class NodeRenderMixin(object):
@@ -184,6 +91,8 @@ class NodeRenderMixin(object):
         return select_template(self._template_iter())
 
     def render(self, context=None, parent=None):
+        if hasattr(self.content_object, 'render'):
+            return self.content_object.render(parent=parent, context=context)
         template = self.template()
         dictionary = {
                     "well": self.well,
@@ -224,3 +133,32 @@ class NodeWrapper(NodeRenderMixin):
     def __str__(self):
         return self.__unicode__()
 
+
+class NodeWrapperQuerySet(object):
+    def __init__(self, queryset, well):
+        self.queryset = queryset
+        self.well = well
+
+    def __iter__(self):
+        return itertools.imap(lambda x: NodeWrapper(x, self.well),
+                self.queryset)
+
+    def __len__(self):
+        return len(self.queryset)
+
+    def __getslice__(self, i, j):
+        return [NodeWrapper(x, self.well) for x in self.queryset[i:j]]
+
+    def __getitem__(self, i):
+        return NodeWrapper(self.queryset[i], self.well)
+
+    def count(self):
+        return len(self)
+
+    def __getattr__(self, key):
+        try:
+            return getattr(super(NodeWrapperQuerySet, self), key)
+        except AttributeError:
+            if key != 'queryset' and hasattr(QuerySet, key):
+                raise NotImplementedError()
+            raise

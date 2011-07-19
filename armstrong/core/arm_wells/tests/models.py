@@ -228,7 +228,7 @@ class WellTestCase(TestCase):
         number_in_well = random.randint(1, 5)
         add_n_random_stories_to_well(number_in_well, well)
         i = 0
-        for story in well:
+        for story in well.items:
             i = i + 1
         self.assertEqual(i, number_in_well)
 
@@ -243,7 +243,7 @@ class WellTestCase(TestCase):
 
         well.merge_with(Story.objects.all())
         i = 0
-        for story in well:
+        for story in well.items:
             i = i + 1
         self.assertEqual(i, number_in_well + number_of_stories)
 
@@ -253,9 +253,9 @@ class WellTestCase(TestCase):
         add_n_random_stories_to_well(number_in_well, well)
         i = 0
         for node in well.nodes.all():
-            self.assertEqual(node.content_object, well[i].content_object)
+            self.assertEqual(node.content_object, well.items[i].content_object)
             i = i + 1
-        self.assertRaises(IndexError, lambda:well[i])
+        self.assertRaises(IndexError, lambda:well.items[i])
 
     def test_well_supports_indexing_with_merged_queryset(self):
         number_of_stories = random.randint(1, 5)
@@ -272,51 +272,15 @@ class WellTestCase(TestCase):
         # keep track of the objects we've already seen
         used_objects = {}
         for node in well.nodes.all():
-            self.assertEqual(node.content_object, well[i].content_object)
+            self.assertEqual(node.content_object, well.items[i].content_object)
             used_objects[node.content_object.id] = 1
             i = i + 1
         for story in qs:
             if story.id in used_objects:
                 continue
-            self.assertEqual(story, well[i].content_object)
+            self.assertEqual(story, well.items[i].content_object)
             i = i + 1
-        self.assertRaises(IndexError, lambda:well[i])
-
-
-class NestedWellTestCase(TestCase):
-    def setUp(self):
-        self.well = generate_random_well()
-        inner = generate_random_well()
-        Node.objects.create(well=self.well, content_object=inner)
-        self.number_in_well = random.randint(1, 5)
-        self.number_in_inner_well = random.randint(1, 5)
-        add_n_random_stories_to_well(self.number_in_well, self.well)
-        add_n_random_stories_to_well(self.number_in_inner_well, inner)
-        self.inner = inner
-
-    def test_indexing_with_nested_well(self):
-        nodes = self.well.nodes.all()
-        inner_nodes = self.inner.nodes.all()
-
-        for i in range(self.number_in_inner_well):
-            self.assertEqual(inner_nodes[i].content_object,
-                    self.well[i].content_object)
-        for i in range(self.number_in_well):
-            self.assertEqual(nodes[i+1].content_object,
-                    self.well[i+self.number_in_inner_well].content_object)
-
-    def test_iterating_with_nested_well(self):
-        nodes = self.well.nodes.all()
-        inner_nodes = self.inner.nodes.all()
-        i = 0
-        for node in self.well:
-            if i < self.number_in_inner_well:
-                self.assertEqual(inner_nodes[i].content_object,
-                        node.content_object)
-            else:
-                self.assertEqual(nodes[i-self.number_in_inner_well+1].content_object,
-                        node.content_object)
-            i = i+1
+        self.assertRaises(IndexError, lambda:well.items[i])
 
 
 class NodeTestCase(TestCase):
