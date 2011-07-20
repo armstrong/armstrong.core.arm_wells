@@ -1,4 +1,5 @@
 from functools import wraps
+from django.db.models.query import QuerySet
 import itertools
 
 def requires_prep(func):
@@ -67,30 +68,49 @@ class MergeQuerySet(object):
             return self.queryset2[start:end]
         return itertools.chain(self.queryset[i:], self.queryset2[0:end])
 
+    def __getattr__(self, key):
+        try:
+            return getattr(super(MergeQuerySet, self), key)
+        except AttributeError:
+            if key != 'queryset' and hasattr(QuerySet, key):
+                raise NotImplementedError()
+            raise
+
 
 class GenericForeignKeyQuerySet(object):
-    def __init__(self, queryset):
+    def __init__(self, queryset, gfk='content_object'):
         self.queryset = queryset
+        model = self.queryset.model
+        for field in model._meta.virtual_fields:
+            if field.name == gfk:
+                self.ct_field = field.ct_field
+                self.fk_field = field.fk_field
+                break
+        else:
+            raise ValueError("No GenericForeignKey named %s on the %s model" \
+                    % (gfk, model))
         self.needs_prep = True
 
     def _prep(self):
         managers = {}
         ordering = {}
         for i, obj in enumerate(self.queryset):
-            model_class = obj.content_type.model_class()
-            key = "%s.%s" % (model_class.__module__, obj.content_type.model)
+            obj_ct = getattr(obj, self.ct_field)
+            obj_fk = getattr(obj, self.fk_field)
+            model_class = obj_ct.model_class()
+            key = "%s.%s" % (model_class.__module__, obj_ct.model)
             if not key in managers:
                 managers[key] = {
-                        "name": obj.content_type.model,
+                        "name": obj_ct.model,
                         # _default_manager is undocumented. If django ever
                         # changes/documents a way to get the default
                         # manager, this will need to change too
                         "manager": model_class._default_manager,
                         "object_ids": [],
                 }
-            node_key = "%s.%i" % (obj.content_type.model, obj.object_id)
+            node_key = "%s.%i" % (obj_ct.model, obj_fk)
             ordering[node_key] = i
-            managers[key]["object_ids"].append(obj.object_id)
+            managers[key]["object_ids"].append(obj_fk)
 
         self.content = [None] * len(ordering)
         for model_data in managers.values():
@@ -114,3 +134,10 @@ class GenericForeignKeyQuerySet(object):
     def __getitem__(self, i):
         return self.content.__getitem__(i)
 
+    def __getattr__(self, key):
+        try:
+            return getattr(super(GenericForeignKeyQuerySet, self), key)
+        except AttributeError:
+            if key != 'queryset' and hasattr(QuerySet, key):
+                raise NotImplementedError()
+            raise

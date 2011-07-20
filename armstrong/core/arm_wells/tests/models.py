@@ -13,7 +13,6 @@ from ._utils import generate_random_welltype
 from ._utils import TestCase
 
 from ..models import Node
-from ..models import NodeWrapper
 from ..models import Well
 from ..models import WellType
 from .. import models
@@ -60,150 +59,6 @@ class WellTestCase(TestCase):
         type = WellType.objects.create(title=title, slug=title)
         well = Well.objects.create(type=type, pub_date=date, expires=date)
         self.assertEqual("%s (%s - %s)" % (title, date, date), str(well))
-
-    def test_render_loads_template_for_node(self):
-        title = "some-random-well-%d" % random.randint(100, 200)
-        type = WellType.objects.create(title=title, slug=title)
-        well = Well.objects.create(type=type)
-        story = generate_random_story()
-        node = Node.objects.create(well=well, content_object=story)
-
-        expected_path = "wells/%s/%s/%s.html" % (story._meta.app_label,
-                story._meta.object_name.lower(), title)
-        random_return = str(random.randint(1000, 2000))
-
-        select_template = fudge.Fake(callable=True)
-        fake_template = fudge.Fake()
-        dictionary = {"well": well, "object": story, "parent": None}
-        def context_has(context):
-            for k, v in dictionary.items():
-                self.assertEqual(v, context[k])
-            return True
-
-        select_template.returns(fake_template)
-        fake_template.provides("render").with_args(arg.passes_test(context_has)).returns(random_return)
-
-        with fudge.patched_context(models, "select_template",
-                select_template):
-            result = well.render()
-
-            self.assertEqual(result, random_return,
-                    msg="Returns what was expected")
-
-    def test_passes_RequestContext_to_template_if_provided_to_render(self):
-        title = "some-random-well-%d" % random.randint(100, 200)
-        type = WellType.objects.create(title=title, slug=title)
-        well = Well.objects.create(type=type)
-        story = generate_random_story()
-        node = Node.objects.create(well=well, content_object=story)
-
-        expected_path = "wells/%s/%s/%s.html" % (story._meta.app_label,
-                story._meta.object_name.lower(), title)
-        random_return = str(random.randint(1000, 2000))
-
-        # doesn't really matter what it is, just that its the result of
-        # RequestContext being invoked
-        mock_context_instance = fudge.Fake().is_a_stub()
-        request = fudge.Fake()
-        RequestContext = fudge.Fake(callable=True)
-        RequestContext.with_args(request).returns(mock_context_instance)
-
-        select_template = fudge.Fake(callable=True)
-        fake_template = fudge.Fake()
-        dictionary = {"well": well, "object": story, "parent": None}
-
-        select_template.returns(fake_template)
-        fake_template.provides("render").with_args(mock_context_instance).returns(random_return)
-
-        with fudge.patched_context(models, "select_template",
-                select_template):
-            with fudge.patched_context(models, "RequestContext",
-                    RequestContext):
-                result = well.render(request)
-
-                self.assertEqual(result, random_return,
-                        msg="Returns what was expected")
-
-    def test_render_loads_template_for_node_without_mocks(self):
-        type = WellType.objects.create(title="Foobar", slug="foobar")
-        well = Well.objects.create(type=type)
-        story = generate_random_story()
-        node = Node.objects.create(well=well, content_object=story)
-
-        result = well.render().strip()
-        expected = "\n".join(["Story Template",
-            "Story: %s" % story.title,
-            "Well: %s" % type.title,
-            ])
-
-        self.assertEqual(expected, result)
-
-    def test_render_loads_template_with_request_for_nodes_without_mocks(self):
-        type = WellType.objects.create(title="Foobar", slug="foobar")
-        well = Well.objects.create(type=type)
-        story = generate_random_story()
-        node = Node.objects.create(well=well, content_object=story)
-
-        result = well.render([123]).strip()
-        expected = "\n".join(["Story Template",
-            "Story: %s" % story.title,
-            "Well: %s" % type.title,
-            "Got Request!",
-            ])
-
-        self.assertEqual(expected, result)
-
-    def test_render_loads_template_for_super_type_if_type_has_no_template(self):
-        type = WellType.objects.create(title="Foobar", slug="foobar")
-        well = Well.objects.create(type=type)
-        story_child = generate_random_story_child()
-        node = Node.objects.create(well=well, content_object=story_child)
-
-        result = well.render([123]).strip()
-        expected = "\n".join(["Story Template",
-            "Story: %s" % story_child.title,
-            "Well: %s" % type.title,
-            "Got Request!",
-            ])
-
-        self.assertEqual(expected, result)
-
-    def test_render_loads_default_template(self):
-        type = WellType.objects.create(title="Foobar", slug="foobar")
-        well = Well.objects.create(type=type)
-        image = generate_random_image()
-        node = Node.objects.create(well=well, content_object=image)
-
-        result = well.render([123]).strip()
-        expected = "\n".join(["Foobar Default",
-            "Title: %s" % image.title,
-            "Well: %s" % type.title,
-            "Got Request!",
-            ])
-
-        self.assertEqual(expected, result)
-
-    def test_calls_render_on_inner_well(self):
-        """
-        This fails if render() is not invoked because there is no "outer.html"
-        template file.
-        """
-        outer_type = WellType.objects.create(title="outer", slug="outer")
-        outer_well = Well.objects.create(type=outer_type)
-        inner_type = WellType.objects.create(title="foobar", slug="foobar")
-        inner_well = Well.objects.create(type=inner_type)
-        well_node = Node.objects.create(well=outer_well, content_object=inner_well)
-        story = generate_random_story()
-        story_node = Node.objects.create(well=inner_well, content_object=story)
-
-        result = outer_well.render().strip()
-        expected = "\n".join(["Story Template",
-            "Parent Well: %s" % outer_type.title,
-            "Story: %s" % story.title,
-            "Well: %s" % inner_type.title,
-            ])
-
-        self.assertEqual(expected, result)
 
     def test_combines_a_well_with_another_queryset(self):
         number_of_stories = random.randint(1, 5)
@@ -253,7 +108,7 @@ class WellTestCase(TestCase):
         add_n_random_stories_to_well(number_in_well, well)
         i = 0
         for node in well.nodes.all():
-            self.assertEqual(node.content_object, well.items[i].content_object)
+            self.assertEqual(node.content_object, well.items[i])
             i = i + 1
         self.assertRaises(IndexError, lambda:well.items[i])
 
@@ -272,13 +127,13 @@ class WellTestCase(TestCase):
         # keep track of the objects we've already seen
         used_objects = {}
         for node in well.nodes.all():
-            self.assertEqual(node.content_object, well.items[i].content_object)
+            self.assertEqual(node.content_object, well.items[i])
             used_objects[node.content_object.id] = 1
             i = i + 1
         for story in qs:
             if story.id in used_objects:
                 continue
-            self.assertEqual(story, well.items[i].content_object)
+            self.assertEqual(story, well.items[i])
             i = i + 1
         self.assertRaises(IndexError, lambda:well.items[i])
 
@@ -293,28 +148,3 @@ class NodeTestCase(TestCase):
 
         expected = "%s (%d): %s" % (well.title, order, story.title)
         self.assertEqual(expected, str(node))
-
-    def test_render_outside_of_well(self):
-        story = generate_random_story()
-        type = WellType.objects.create(title="Foobar", slug="foobar")
-        well = Well.objects.create(type=type)
-        order = random.randint(100, 200)
-        node = Node.objects.create(well=well, content_object=story,
-                                   order=order)
-        expected = u"\n".join(["Story Template",
-            "Story: %s" % story.title,
-            "Well: %s" % well.title,
-            '',
-            '',
-            ])
-        self.assertEqual(expected, node.render())
-
-class NodeWrapperTestCase(TestCase):
-    def test_string_representation(self):
-        story = generate_random_story()
-        well = generate_random_well()
-        node_wrapper = NodeWrapper(well=well, content_object=story)
-
-        expected = "%s: %s" % (well.title, story.title)
-        self.assertEqual(expected, str(node_wrapper))
-
