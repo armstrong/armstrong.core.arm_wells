@@ -1,13 +1,13 @@
 import datetime
 from django.db import models
+from django.db.models.query import QuerySet
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
-from django.template import RequestContext
-from django.template.loader import render_to_string
-from django.template import TemplateDoesNotExist
 
 from .managers import WellManager
-from .query import MergedNodesAndQuerySet
+from .querysets import MergeQuerySet, GenericForeignKeyQuerySet
+
+import itertools
 
 
 class WellType(models.Model):
@@ -26,6 +26,10 @@ class Well(models.Model):
 
     objects = WellManager()
 
+    def __init__(self, *args, **kwargs):
+        super(Well, self).__init__(*args, **kwargs)
+        self.queryset = None
+
     @property
     def title(self):
         return self.type.title
@@ -39,31 +43,17 @@ class Well(models.Model):
             self.pub_date = datetime.datetime.now()
         return super(Well, self).save(*args, **kwargs)
 
+    @property
+    def items(self):
+        node_qs = GenericForeignKeyQuerySet(self.nodes.all().select_related())
+        if self.queryset is None:
+            return node_qs
+        else:
+            return MergeQuerySet(node_qs, self.queryset)
+
     def merge_with(self, queryset):
-        return MergedNodesAndQuerySet(self, queryset)
-
-    def render(self, request=None, parent=None):
-        ret = []
-        kwargs = {}
-        if request:
-            kwargs['context_instance'] = RequestContext(request)
-
-        for node in self.nodes.all():
-            kwargs["dictionary"] = {
-                    "well": self,
-                    "object": node.content_object,
-                    "parent": parent,
-            }
-            content = node.content_object
-
-            if hasattr(content, "render"):
-                ret.append(content.render(request, parent=self))
-            else:
-                ret.append(render_to_string("wells/%s/%s/%s.html" % (
-                    content._meta.app_label,
-                    content._meta.object_name.lower(),
-                    self.type.slug), **kwargs))
-        return ''.join(ret)
+        self.queryset = queryset
+        return self.items
 
 
 class Node(models.Model):
@@ -77,5 +67,5 @@ class Node(models.Model):
         ordering = ["order"]
 
     def __unicode__(self):
-        return "%s (%d): %s" % (self.well.title, self.order,
+        return u"%s (%d): %s" % (self.well.title, self.order,
                                 self.content_object)

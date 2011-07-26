@@ -1,16 +1,12 @@
 armstrong.core.arm_wells
 ========================
-Provides the basic content well code necessary for scheduling models
-inside ArmstrongCMS.
+Provides the basic content well code necessary for scheduling and arranging
+models inside ArmstrongCMS. Conceptually, a well is an ordered grouping of
+content that can expire.
 
 .. warning:: This is development level software.  Please do not unless you are
              familiar with what that means and are comfortable using that type
              of software.
-
-Usage
------
-
-**TODO**
 
 Installation
 ------------
@@ -19,6 +15,35 @@ Installation
 
     NAME=armstrong.core.arm_wells
     pip install -e git://github.com/armstrong/$NAME.git#egg=$NAME
+
+
+Usage
+-----
+
+Wells utilize GenericForeignKeys to associate content with themselves, so any
+model can be placed in a well, regardless of if it inherits from
+armstrong.core.arm_content.models.ContentBase
+
+Wells can also be backed by a queryset which will be used as a source of
+additional content after all items have been exhausted. Currently, this is not
+configurable via the admin, but is easily accomplished by using the
+QuerySetBackedWellView. In your urls.py::
+
+    url(r'^$', QuerySetBackedWellView.as_view(well_title='front_page',
+                                              template_name="index.html",
+                                              queryset=Article.published.all()),
+            name='front_page'),
+    # get's the current 'front_page' well, backs it with Article.published.all()
+    # and renders the index.html page
+
+To render a well we recommend using the armstrong.core.arm_layout module. This
+will allow simple templates to handle heterogenous content. For instance, to
+render ever item in a well using the 'standard' layout::
+
+    {% load layout_helpers %}
+    {% for content in well.items %}
+        {% render_model content 'standard' %}
+    {% endfor %}
 
 
 Contributing
@@ -41,7 +66,7 @@ Foundation`_.  The first release is scheduled for June, 2011.
 
 To follow development, be sure to join the `Google Group`_.
 
-``armstrong.core.arm_content`` is part of the `Armstrong`_ project.  You're
+``armstrong.core.arm_wells`` is part of the `Armstrong`_ project.  You're
 probably looking for that.
 
 
