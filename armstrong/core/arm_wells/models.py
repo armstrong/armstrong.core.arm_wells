@@ -7,8 +7,6 @@ from django.contrib.contenttypes.models import ContentType
 from .managers import WellManager
 from .querysets import MergeQuerySet, GenericForeignKeyQuerySet
 
-import itertools
-
 
 class WellType(models.Model):
     title = models.CharField(max_length=100)
