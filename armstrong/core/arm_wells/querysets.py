@@ -44,7 +44,12 @@ class MergeQuerySet(object):
 
     @requires_prep
     def __getitem__(self, i):
-        if type(i) is not int:
+        if type(i) is slice:
+            start, stop, step = i.indices(len(self))
+            if step != 1:
+                raise TypeError('MergeQuerySet only supports simple slices')
+            return self.__getslice__(start, stop)
+        elif type(i) is not int:
             raise TypeError
         if i < len(self.queryset):
             return self.queryset[i]
