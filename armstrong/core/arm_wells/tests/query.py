@@ -12,7 +12,7 @@ from ..models import Node
 class SimpleMergedNodesAndQuerySetTests(TestCase):
     """Tests that don't require all of the setup and such"""
 
-    def test_merges_correctly_when_sliced_across_the_well_content(self):
+    def test_merge_when_sliced_across_the_well_content_with_slice_object(self):
         well = generate_random_well()
         stories = [generate_random_story() for i in range(2)]
         add_n_random_stories_to_well(2, well)
