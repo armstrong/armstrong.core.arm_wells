@@ -22,12 +22,12 @@ Usage
 
 Wells utilize GenericForeignKeys to associate content with themselves, so any
 model can be placed in a well, regardless of if it inherits from
-armstrong.core.arm_content.models.ContentBase
+``armstrong.core.arm_content.models.ContentBase``
 
 Wells can also be backed by a queryset which will be used as a source of
 additional content after all items have been exhausted. Currently, this is not
 configurable via the admin, but is easily accomplished by using the
-QuerySetBackedWellView. In your urls.py::
+``QuerySetBackedWellView``. In your urls.py::
 
     url(r'^$', QuerySetBackedWellView.as_view(well_title='front_page',
                                               template_name="index.html",
@@ -36,9 +36,9 @@ QuerySetBackedWellView. In your urls.py::
     # get's the current 'front_page' well, backs it with Article.published.all()
     # and renders the index.html page
 
-To render a well we recommend using the armstrong.core.arm_layout module. This
-will allow simple templates to handle heterogenous content. For instance, to
-render ever item in a well using the 'standard' layout::
+To render a well we recommend using the ``armstrong.core.arm_layout module``.
+This will allow simple templates to handle heterogenous content. For instance,
+to render ever item in a well using the 'standard' layout::
 
     {% load layout_helpers %}
     {% for content in well.items %}
