@@ -3,6 +3,8 @@ from django.contrib import admin
 from django.contrib.contenttypes import generic
 from reversion.admin import VersionAdmin
 
+from armstrong.hatband.options import GenericKeyInline
+
 from . import models
 
 
@@ -10,7 +12,7 @@ class NodeAdmin(VersionAdmin):
     pass
 
 
-class NodeInline(admin.TabularInline):
+class NodeInline(GenericKeyInline):
     model = models.Node
     extra = 1
 
