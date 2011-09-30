@@ -6,6 +6,7 @@ settings = {
         'django.contrib.contenttypes',
         'armstrong.core.arm_wells',
         'armstrong.core.arm_wells.tests.arm_wells_support',
+        'south',
     ),
     'TEMPLATE_CONTEXT_PROCESSORS': (
         'django.core.context_processors.request',
