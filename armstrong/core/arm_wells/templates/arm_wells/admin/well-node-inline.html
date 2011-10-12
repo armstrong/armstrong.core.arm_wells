@@ -1,0 +1,28 @@
+{% extends 'admin/edit_inline/backbone.html' %}
+
+{% block templates %}
+<script type="text/template" id="{{ prefix }}-list-item-template">
+    <li class="item">
+        <span class="content"><%= content_id %></span>
+        <h4>Rendering</h4>
+        <button class="delete">Delete</button
+    </li>
+</script>
+<script>
+(function($) {
+    $(document).ready(function($) {
+        var collection = new window.NodeList();
+        collection.add(new Node({content_id: 4}));
+        collection.add(new Node({content_id: 6}));
+        collection.add(new Node({content_id: 7}));
+        collection.add(new Node({content_id: 3}));
+        window.App = new window.NodeListView({
+            prefix: '{{ prefix }}',
+            collection: collection,
+            target_id: '#{{ prefix }}-collection'
+        });
+        window.App.addAll();
+    });
+})(django.jQuery);
+</script>
+{% endblock %}
