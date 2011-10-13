@@ -2,27 +2,24 @@
 
 {% block templates %}
 <script type="text/template" id="{{ prefix }}-list-item-template">
-    <li class="item">
-        <span class="content"><%= content_id %></span>
-        <h4>Rendering</h4>
-        <button class="delete">Delete</button
-    </li>
+    <button class="delete">Delete</button
+    <span class="content"><%= attributes.content_type %> - <%= attributes.object_id %></span>
+    <b><%= attributes.order %></b>
 </script>
 <script>
-(function($) {
-    $(document).ready(function($) {
-        var collection = new window.NodeList();
-        collection.add(new Node({content_id: 4}));
-        collection.add(new Node({content_id: 6}));
-        collection.add(new Node({content_id: 7}));
-        collection.add(new Node({content_id: 3}));
-        window.App = new window.NodeListView({
-            prefix: '{{ prefix }}',
-            collection: collection,
-            target_id: '#{{ prefix }}-collection'
-        });
-        window.App.addAll();
+$(function() {
+    window.{{ prefix }}Collection = new window.NodeList();
+    window.{{ prefix }}Collection.parseForm('{{ prefix }}');
+    window.App = new window.NodeListView({
+        prefix: '{{ prefix }}',
+        collection: window.{{ prefix }}Collection,
+        el: '#{{ prefix }}-collection'
     });
-})(django.jQuery);
+    window.App.addAll();
+    $("#{{ prefix }}-collection").sortable();
+    $("#{{ prefix }}-collection").bind("sortupdate", function(event, ui){
+        window.App.sorted();
+    });
+});
 </script>
 {% endblock %}

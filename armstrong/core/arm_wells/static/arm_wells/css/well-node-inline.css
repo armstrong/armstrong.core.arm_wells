@@ -1,0 +1,9 @@
+.node-inline {
+    padding: 10px;
+    margin:10px;
+    background: gray;
+}
+
+.node-inline .delete {
+    display: inline;
+}

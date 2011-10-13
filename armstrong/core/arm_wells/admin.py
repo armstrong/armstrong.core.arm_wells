@@ -15,7 +15,12 @@ class NodeAdmin(VersionAdmin):
 
 class NodeInlineAdminForm(OrderableGenericKeyLookupForm):
     class Media:
-        js = ('arm_wells/js/well-node-inline.js', )
+        js = (
+                'hatband/js/jquery-ui-1.8.16.min.js',
+                'arm_wells/js/well-node-inline.js',
+              )
+        css = {'all': ('arm_wells/css/well-node-inline.css',
+                       'hatband/css/jquery/ui-lightness/jquery-ui-1.8.16.custom.css',)}
 
 
 class NodeInline(BackboneInline):
