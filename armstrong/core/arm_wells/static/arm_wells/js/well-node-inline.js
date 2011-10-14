@@ -55,7 +55,8 @@ window.NodeListView = Backbone.View.extend({
         });
         $(this.el).sortable();
         // note jQuery bind, not backbone
-        $(this.el).bind('sortupdate', this.sorted);
+        var self = this;
+        $(this.el).bind('sortupdate', function(){self.sorted();});
     },
     addOne: function(node) {
         var view = new window.NodeListItemView({
@@ -73,7 +74,6 @@ window.NodeListView = Backbone.View.extend({
     },
     addFromForm: function() {
         var selector = "input[id^='id_" + this.options.prefix + "-__prefix__']"
-        alert(selector);
         var sourceForm = $(selector);
         var formId = this.collection.length;
         var formDiv = $('<div id="' + this.options.prefix + '-' + formId + '" class="' + this.options.prefix + '-object"></div>');
@@ -92,7 +92,6 @@ window.NodeListView = Backbone.View.extend({
         this.addOne(node);
     },
     sorted: function() {
-        alert('sorted');
         var self = this;
         var models = _.map($(this.el).children(), function(item){
             return self.collection.getByCid($(item).attr('id'));

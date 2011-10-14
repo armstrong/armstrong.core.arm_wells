@@ -1,7 +1,14 @@
 {% extends 'admin/edit_inline/backbone.html' %}
 
 {% block emptyForm %}
-    {{ inline_admin_formset.formset.empty_form.as_p }}
+    {% with inline_admin_formset.formset.prefix as prefix %}
+    {% for field in inline_admin_formset.formset.empty_form.hidden_fields %}
+        {{ field }}
+    {% endfor %}
+    <div class="gfkWrapper">
+    {{ inline_admin_formset.formset.empty_form.object_id }}
+    </div>
+    {{ inline_admin_formset.formset.empty_form.deletion_field.as_hidden_field }}
 
     <script>
     $(document).ready(function() {
@@ -10,8 +17,14 @@
           queryLookupURL: "{% url admin:type_and_model_to_query %}",
           id: "id_{{ prefix }}-__prefix__-object_id"
         });
+        window.App = new window.NodeListView({
+            prefix: '{{ prefix }}',
+            el: '#{{ prefix }}-collection'
+        });
+        window.App.addAll();
     });
     </script>
+    {% endwith %}
 
 {% endblock %}
 
@@ -20,14 +33,5 @@
     <button class="delete">Delete</button
     <span class="content"><%= attributes.content_type %> - <%= attributes.object_id %></span>
     <b><%= attributes.order %></b>
-</script>
-<script>
-$(function() {
-    window.App = new window.NodeListView({
-        prefix: '{{ prefix }}',
-        el: '#{{ prefix }}-collection'
-    });
-    window.App.addAll();
-});
 </script>
 {% endblock %}

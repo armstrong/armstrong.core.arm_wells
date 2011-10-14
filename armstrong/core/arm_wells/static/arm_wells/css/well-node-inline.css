@@ -7,3 +7,7 @@
 .node-inline .delete {
     display: inline;
 }
+
+.gfkWrapper {
+    margin:10px;
+}
