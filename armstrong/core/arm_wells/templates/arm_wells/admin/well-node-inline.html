@@ -1,5 +1,20 @@
 {% extends 'admin/edit_inline/backbone.html' %}
 
+{% block emptyForm %}
+    {{ inline_admin_formset.formset.empty_form.as_p }}
+
+    <script>
+    $(document).ready(function() {
+        armstrong.widgets.generickey($, {
+          facetURL: "{% url admin:generic_key_facets %}",
+          queryLookupURL: "{% url admin:type_and_model_to_query %}",
+          id: "id_{{ prefix }}-__prefix__-object_id"
+        });
+    });
+    </script>
+
+{% endblock %}
+
 {% block templates %}
 <script type="text/template" id="{{ prefix }}-list-item-template">
     <button class="delete">Delete</button
@@ -8,18 +23,11 @@
 </script>
 <script>
 $(function() {
-    window.{{ prefix }}Collection = new window.NodeList();
-    window.{{ prefix }}Collection.parseForm('{{ prefix }}');
     window.App = new window.NodeListView({
         prefix: '{{ prefix }}',
-        collection: window.{{ prefix }}Collection,
         el: '#{{ prefix }}-collection'
     });
     window.App.addAll();
-    $("#{{ prefix }}-collection").sortable();
-    $("#{{ prefix }}-collection").bind("sortupdate", function(event, ui){
-        window.App.sorted();
-    });
 });
 </script>
 {% endblock %}
