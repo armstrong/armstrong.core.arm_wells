@@ -21,7 +21,6 @@
             prefix: '{{ prefix }}',
             el: '#{{ prefix }}-collection'
         });
-        window.App.addAll();
     });
     </script>
     {% endwith %}
@@ -30,8 +29,13 @@
 
 {% block templates %}
 <script type="text/template" id="{{ prefix }}-list-item-template">
-    <button class="delete">Delete</button
-    <span class="content"><%= attributes.content_type %> - <%= attributes.object_id %></span>
-    <b><%= attributes.order %></b>
+    <button class="delete">Delete</button>
+        <span class="title"><%
+        if (typeof title !== 'undefined') {
+            print(title);
+        } else {
+            print("Content Type: " + content_type + " - Object: " + object_id);
+        }%></span>
+    <b>Order: <%= order %></b>
 </script>
 {% endblock %}
