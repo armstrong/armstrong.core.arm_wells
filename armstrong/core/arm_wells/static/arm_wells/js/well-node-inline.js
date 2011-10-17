@@ -1,15 +1,15 @@
-window.Node = window.Item.extend({
-    url: "",
+Node = Item.extend({
+    url: ""
 });
 
-window.NodeList = Backbone.Collection.extend({
+NodeList = Backbone.Collection.extend({
     url: "",
-    model: window.Node,
+    model: Node,
     parseForm: function(prefix) {
         var forms = $('#' + prefix + '-forms');
         var list = this;
         forms.children().each(function(idx, el){
-            var node = new window.Node({prefix: el.id+"-"});
+            var node = new Node({prefix: el.id+"-"});
             list.add(node);
         });
     },
@@ -18,7 +18,7 @@ window.NodeList = Backbone.Collection.extend({
     }
 });
 
-window.ManagementForm = Backbone.View.extend({
+ManagementForm = Backbone.View.extend({
     initialize: function() {
         this.options.collection.bind("reset", this.update, this);
         this.options.collection.bind("add", this.update, this);
@@ -29,7 +29,7 @@ window.ManagementForm = Backbone.View.extend({
     }
 })
 
-window.NodeListItemView = Backbone.View.extend({
+NodeListItemView = Backbone.View.extend({
     tagName: "div",
     className: "node-inline",
     events: {
@@ -60,14 +60,14 @@ window.NodeListItemView = Backbone.View.extend({
     }
 });
 
-window.NodeListView = Backbone.View.extend({
+NodeListView = Backbone.View.extend({
     tagName: "div",
     initialize: function() {
         if (!this.collection) {
-            this.collection = new window.NodeList;
+            this.collection = new NodeList;
             this.collection.parseForm(this.options.prefix);
         }
-        this.options.managementForm = new window.ManagementForm({
+        this.options.managementForm = new ManagementForm({
             prefix: this.options.prefix,
             collection: this.collection
         });
@@ -80,7 +80,7 @@ window.NodeListView = Backbone.View.extend({
         this.displayCollection();
     },
     displayNode: function(node) {
-        var view = new window.NodeListItemView({
+        var view = new NodeListItemView({
                 model: node,
                 id: node.cid,
                 prefix: this.options.prefix,
@@ -107,7 +107,7 @@ window.NodeListView = Backbone.View.extend({
             newEl.attr('type', 'hidden')
             formDiv.append(newEl);
         });
-        var node = new window.Node({prefix: this.options.prefix+"-"+formId+"-"});
+        var node = new Node({prefix: this.options.prefix+"-"+formId+"-"});
         node.parse();
         this.addNode(node);
     },

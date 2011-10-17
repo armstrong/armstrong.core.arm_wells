@@ -12,19 +12,22 @@
 
     <script>
     $(document).ready(function() {
+        {{ prefix }}App = new NodeListView({
+            prefix: '{{ prefix }}',
+            el: '#{{ prefix }}-collection'
+        });
         armstrong.widgets.generickey($, {
           facetURL: "{% url admin:generic_key_facets %}",
           queryLookupURL: "{% url admin:type_and_model_to_query %}",
-          id: "id_{{ prefix }}-__prefix__-object_id"
-        });
-        window.App = new window.NodeListView({
-            prefix: '{{ prefix }}',
-            el: '#{{ prefix }}-collection'
+          id: "id_{{ prefix }}-__prefix__-object_id",
+          searchDone: function(app) {
+            {{ prefix }}App.addNodeFromForm();
+            app.searchBox.clearSearch();
+          }
         });
     });
     </script>
     {% endwith %}
-
 {% endblock %}
 
 {% block templates %}
