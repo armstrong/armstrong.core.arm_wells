@@ -84,7 +84,7 @@ window.NodeListView = Backbone.View.extend({
                 model: node,
                 id: node.cid,
                 prefix: this.options.prefix,
-                template: _.template($('#nodes-list-item-template').html())
+                template: _.template($('#'+this.options.prefix+'-list-item-template').html())
             });
         $(this.el).append(view.render().el);
     },
