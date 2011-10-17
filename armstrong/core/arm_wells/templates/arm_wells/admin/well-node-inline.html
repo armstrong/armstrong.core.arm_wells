@@ -14,7 +14,8 @@
     $(document).ready(function() {
         {{ prefix }}App = new NodeListView({
             prefix: '{{ prefix }}',
-            el: '#{{ prefix }}-collection'
+            el: '#{{ prefix }}-collection',
+            preview_url: '{% url admin:render_model_preview %}'
         });
         armstrong.widgets.generickey($, {
           facetURL: "{% url admin:generic_key_facets %}",
@@ -33,12 +34,11 @@
 {% block templates %}
 <script type="text/template" id="{{ prefix }}-list-item-template">
     <button class="delete">Delete</button>
-        <span class="title"><%
-        if (typeof title !== 'undefined') {
-            print(title);
-        } else {
-            print("Content Type: " + content_type + " - Object: " + object_id);
-        }%></span>
-    <b>Order: <%= order %></b>
+    <div class="content"><%
+      if (typeof hatband_display !== 'undefined') {
+          print(hatband_display);
+      } else {
+          print("Content Type: " + content_type + " - Object: " + object_id);
+      }%></div>
 </script>
 {% endblock %}

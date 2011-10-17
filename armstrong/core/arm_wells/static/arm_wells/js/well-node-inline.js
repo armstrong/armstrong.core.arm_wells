@@ -41,17 +41,19 @@ NodeListItemView = Backbone.View.extend({
     render: function() {
         var html = this.options.template(this.model.toJSON());
         $(this.el).html(html);
-        $.get("/admin/armstrong/search/type_and_model_to_query/",
-              {  object_id: this.model.get("object_id"),
-                 content_type_id: this.model.get("content_type")},
-              this.setTitle(),
-              'json');
+        if (this.model.get("hatband_display") === undefined) {
+            $.get(this.options.preview_url,
+                  {  object_id: this.model.get("object_id"),
+                     content_type_id: this.model.get("content_type")},
+                  this.setDisplay(),
+                  'html');
+        }
         return this;
     },
-    setTitle: function() {
+    setDisplay: function() {
         var self = this;
         return function(data, status, jqXHR) {
-            self.model.set({title: data.query});
+            self.model.set({hatband_display: data});
         }
     },
     deletePushed: function() {
@@ -84,7 +86,8 @@ NodeListView = Backbone.View.extend({
                 model: node,
                 id: node.cid,
                 prefix: this.options.prefix,
-                template: _.template($('#'+this.options.prefix+'-list-item-template').html())
+                template: _.template($('#'+this.options.prefix+'-list-item-template').html()),
+                preview_url: this.options.preview_url
             });
         $(this.el).append(view.render().el);
     },

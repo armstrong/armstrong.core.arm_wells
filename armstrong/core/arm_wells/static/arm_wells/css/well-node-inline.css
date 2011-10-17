@@ -1,7 +1,7 @@
 .node-inline {
     padding: 10px;
     margin:10px;
-    background: gray;
+    border: 1px grey dashed;
 }
 
 .node-inline .delete {
