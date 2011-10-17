@@ -25,20 +25,38 @@ window.ManagementForm = Backbone.View.extend({
         this.options.collection.bind("remove", this.update, this);
     },
     update: function() {
-        $("id_"+this.options.prefix+"-TOTAL_FORMS").val(this.options.collection.length);
+        $("#id_"+this.options.prefix+"-TOTAL_FORMS").val(this.options.collection.length);
     }
 })
 
 window.NodeListItemView = Backbone.View.extend({
     tagName: "div",
     className: "node-inline",
+    events: {
+        "click .delete": "deletePushed"
+    },
     initialize: function() {
         this.model.bind('change', this.render, this);
     },
     render: function() {
-        var html = this.options.template(this.model);
+        var html = this.options.template(this.model.toJSON());
         $(this.el).html(html);
+        $.get("/admin/armstrong/search/type_and_model_to_query/",
+              {  object_id: this.model.get("object_id"),
+                 content_type_id: this.model.get("content_type")},
+              this.setTitle(),
+              'json');
         return this;
+    },
+    setTitle: function() {
+        var self = this;
+        return function(data, status, jqXHR) {
+            self.model.set({title: data.query});
+        }
+    },
+    deletePushed: function() {
+        this.model.set({DELETE: 1});
+        $(this.el).hide('drop');
     }
 });
 
@@ -53,12 +71,15 @@ window.NodeListView = Backbone.View.extend({
             prefix: this.options.prefix,
             collection: this.collection
         });
+
         $(this.el).sortable();
         // note jQuery bind, not backbone
         var self = this;
         $(this.el).bind('sortupdate', function(){self.sorted();});
+
+        this.displayCollection();
     },
-    addOne: function(node) {
+    displayNode: function(node) {
         var view = new window.NodeListItemView({
                 model: node,
                 id: node.cid,
@@ -67,12 +88,12 @@ window.NodeListView = Backbone.View.extend({
             });
         $(this.el).append(view.render().el);
     },
-    addAll: function() {
+    displayCollection: function() {
         for(i=0; i<this.collection.length; i++){
-            this.addOne(this.collection.at(i));
+            this.displayNode(this.collection.at(i));
         }
     },
-    addFromForm: function() {
+    addNodeFromForm: function() {
         var selector = "input[id^='id_" + this.options.prefix + "-__prefix__']"
         var sourceForm = $(selector);
         var formId = this.collection.length;
@@ -88,8 +109,12 @@ window.NodeListView = Backbone.View.extend({
         });
         var node = new window.Node({prefix: this.options.prefix+"-"+formId+"-"});
         node.parse();
+        this.addNode(node);
+    },
+    addNode: function(node) {
         this.collection.add(node);
-        this.addOne(node);
+        this.displayNode(node);
+        this.sorted();
     },
     sorted: function() {
         var self = this;
