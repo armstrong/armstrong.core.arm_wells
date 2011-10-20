@@ -57,7 +57,13 @@ NodeListItemView = Backbone.View.extend({
         }
     },
     deletePushed: function(evt) {
-        if (evt.detail < 1) { return; }
+        if (evt.detail < 1) {
+          // workaround for a visualsearch bug, pressing enter when there's
+          // invalid text in there causes it to "click" on the first button
+          // If we don't do this we'll submit the whole form
+          evt.preventDefault();
+          return;
+        }
         this.model.set({DELETE: 1});
         $(this.el).hide('drop');
     }
