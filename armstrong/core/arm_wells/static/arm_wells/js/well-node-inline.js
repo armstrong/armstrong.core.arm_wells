@@ -33,7 +33,7 @@ NodeListItemView = Backbone.View.extend({
     tagName: "div",
     className: "node-inline",
     events: {
-        "click .delete": "deletePushed"
+        "click .delete_button": "deletePushed"
     },
     initialize: function() {
         this.model.bind('change', this.render, this);
@@ -56,7 +56,8 @@ NodeListItemView = Backbone.View.extend({
             self.model.set({hatband_display: data});
         }
     },
-    deletePushed: function() {
+    deletePushed: function(evt) {
+        if (evt.detail < 1) { return; }
         this.model.set({DELETE: 1});
         $(this.el).hide('drop');
     }
