@@ -1,38 +1,42 @@
 {% extends 'admin/edit_inline/backbone.html' %}
 
 {% block emptyForm %}
-    {% with inline_admin_formset.formset.prefix as prefix %}
-    {% for field in inline_admin_formset.formset.empty_form.hidden_fields %}
-        {{ field }}
-    {% endfor %}
-    <div class="gfkWrapper">
-    {{ inline_admin_formset.formset.empty_form.object_id }}
-    </div>
-    {{ inline_admin_formset.formset.empty_form.deletion_field.as_hidden_field }}
+      {% for field in inline_admin_formset.formset.empty_form.hidden_fields %}
+          {{ field }}
+      {% endfor %}
+      <div class="gfkWrapper">
+      {{ inline_admin_formset.formset.empty_form.object_id }}
+      </div>
+      {{ inline_admin_formset.formset.empty_form.deletion_field.as_hidden_field }}
+{% endblock %}
 
+{% block scriptInit %}
     <script>
     $(document).ready(function() {
-        {{ prefix }}App = new NodeListView({
-            prefix: '{{ prefix }}',
-            el: '#{{ prefix }}-collection',
+        {{ namespace }}EmptyForm = new EmptyForm({
+            el: $('#{{ namespace }}-empty-form')
+        })
+        {{ namespace }}App = new NodeListView({
+            namespace: '{{ namespace }}',
+            el: '#{{ namespace }}-collection',
+            emptyForm: {{ namespace }}EmptyForm,
             preview_url: '{% url admin:render_model_preview %}'
         });
         armstrong.widgets.generickey($, {
           facetURL: "{% url admin:generic_key_facets %}",
           queryLookupURL: "{% url admin:type_and_model_to_query %}",
-          id: "id_{{ prefix }}-__prefix__-object_id",
+          id: "id_{{ namespace }}-__prefix__-object_id",
           searchDone: function(app) {
-            {{ prefix }}App.addNodeFromForm();
+            {{ namespace }}EmptyForm.trigger('createObject');
             app.searchBox.clearSearch();
           }
         });
     });
     </script>
-    {% endwith %}
 {% endblock %}
 
 {% block templates %}
-<script type="text/template" id="{{ prefix }}-list-item-template">
+<script type="text/template" id="{{ namespace }}-list-item-template">
     <button class="delete_button">Delete</button>
     <div class="content"><%
       if (typeof hatband_display !== 'undefined') {
