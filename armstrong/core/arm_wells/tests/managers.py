@@ -14,8 +14,8 @@ class WellManagerTestCase(TestCase):
 
         type = WellType.objects.create(title="well-title", slug="well-title")
         future = Well.objects.create(type=type, pub_date=future_time)
-        present = Well.objects.create(type=type)
         past = Well.objects.create(type=type, pub_date=past_time)
+        present = Well.objects.create(type=type)
 
         self.assertEqual(present, Well.objects.get_current("well-title"))
 
