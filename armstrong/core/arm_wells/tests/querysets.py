@@ -136,7 +136,7 @@ class GenericForeignKeyQuerySetTestCase(TestCase):
         for i in range(3):
             Node.objects.create(content_object=story, order=i, well=well)
         for i in range(3):
-            self.assertEqual(well.items[0], story)
+            self.assertEqual(well.items[i], story)
 
 class MergeQuerySetTestCase(TestCase):
     def setUp(self):
