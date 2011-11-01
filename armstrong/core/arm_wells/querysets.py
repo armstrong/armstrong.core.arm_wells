@@ -114,17 +114,17 @@ class GenericForeignKeyQuerySet(object):
                         "object_ids": [],
                 }
             node_key = "%s.%i" % (obj_ct.model, obj_fk)
-            ordering[node_key] = i
+            ordering.setdefault(node_key, []).append(i)
             managers[key]["object_ids"].append(obj_fk)
 
-        self.content = [None] * len(ordering)
+        self.content = [None] * len(self.queryset)
         for model_data in managers.values():
             node_content = model_data["manager"].filter(
                     pk__in=model_data["object_ids"])
             for obj in node_content:
                 node_key = "%s.%i" % (model_data['name'], obj.pk)
-                idx = ordering[node_key]
-                self.content[idx] = obj
+                for idx in ordering[node_key]:
+                    self.content[idx] = obj
         self.needs_prep = False
 
     @requires_prep
