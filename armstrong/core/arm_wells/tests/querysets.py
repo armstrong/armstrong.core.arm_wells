@@ -130,6 +130,14 @@ class GenericForeignKeyQuerySetTestCase(TestCase):
                         gfk='bad_field_name'
                     )
 
+    def test_works_with_duplicate_nodes(self):
+        well = generate_random_well()
+        story = generate_random_story()
+        for i in range(3):
+            Node.objects.create(content_object=story, order=i, well=well)
+        for i in range(3):
+            self.assertEqual(well.items[i], story)
+
 class MergeQuerySetTestCase(TestCase):
     def setUp(self):
         super(MergeQuerySetTestCase, self).setUp()
