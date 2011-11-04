@@ -6,7 +6,8 @@ from ._utils import (add_n_random_stories_to_well, add_n_random_images_to_well,
         generate_random_image, generate_random_story, generate_random_well,
         TestCase)
 
-from ..querysets import GenericForeignKeyQuerySet, MergeQuerySet
+from ..querysets import (GenericForeignKeyQuerySet, MergeQuerySet,
+        FilterException)
 from ..models import Node
 
 
@@ -22,12 +23,6 @@ class GenericForeignKeyQuerySetTestCase(TestCase):
         self.extra_stories = []
         for i in range(self.number_of_extra_stories):
             self.extra_stories.append(generate_random_story())
-
-    def test_raises_NotImplementedError_on_filter(self):
-        with self.assertRaises(NotImplementedError):
-            gfk_qs = GenericForeignKeyQuerySet(self.well.nodes.all()\
-                    .select_related())
-            gfk_qs.filter()
 
     def test_raises_NotImplementedError_on_exclude(self):
         with self.assertRaises(NotImplementedError):
@@ -138,6 +133,37 @@ class GenericForeignKeyQuerySetTestCase(TestCase):
         for i in range(3):
             self.assertEqual(well.items[i], story)
 
+    def test_count(self):
+        well = generate_random_well()
+        content = [generate_random_story(), generate_random_image(),
+                generate_random_story()]
+        for i, obj in enumerate(content):
+            Node.objects.create(content_object=obj, order=i, well=well)
+
+        queryset = well.items
+        self.assertEqual(3, queryset.count())
+
+    def test_empty_filter(self):
+        well = generate_random_well()
+        content = [generate_random_story(), generate_random_image(),
+                generate_random_story()]
+        for i, obj in enumerate(content):
+            Node.objects.create(content_object=obj, order=i, well=well)
+
+        queryset = well.items
+        self.assertEqual(3, len(queryset.filter()))
+
+    def test_non_empty_filter(self):
+        well = generate_random_well()
+        content = [generate_random_story(), generate_random_image(),
+                generate_random_story()]
+        for i, obj in enumerate(content):
+            Node.objects.create(content_object=obj, order=i, well=well)
+
+        queryset = well.items
+        with self.assertRaises(FilterException):
+            self.assertEqual(3, len(queryset.filter(title__in=['foo','bar'])))
+
 class MergeQuerySetTestCase(TestCase):
     def setUp(self):
         super(MergeQuerySetTestCase, self).setUp()
@@ -151,12 +177,6 @@ class MergeQuerySetTestCase(TestCase):
         for i in range(self.number_in_b):
             generate_random_image()
         self.qs_b = Image.objects.all()
-
-
-    def test_raises_NotImplementedError_on_filter(self):
-        with self.assertRaises(NotImplementedError):
-            merge_qs = MergeQuerySet(self.qs_a, self.qs_b)
-            merge_qs.filter()
 
     def test_raises_NotImplementedError_on_exclude(self):
         with self.assertRaises(NotImplementedError):
@@ -214,3 +234,13 @@ class MergeQuerySetTestCase(TestCase):
         objs = list(merge_qs)
         for i, obj in enumerate(objs):
             self.assertFalse(obj in merge_qs[i+1:])
+
+    def test_empty_filter(self):
+        merge_qs = MergeQuerySet(self.qs_a.all(), self.qs_b.all())
+        filtered = merge_qs.filter()
+        self.assertEqual(len(filtered), len(self.qs_a) + len(self.qs_b))
+
+    def test_non_empty_filter(self):
+        merge_qs = MergeQuerySet(self.qs_a.all(), self.qs_b.all())
+        filtered = merge_qs.filter(id__lte=2)
+        self.assertEqual(len(filtered), 2)
