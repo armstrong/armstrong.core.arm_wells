@@ -3,6 +3,9 @@ from django.contrib import admin
 from django.contrib.contenttypes import generic
 from reversion.admin import VersionAdmin
 
+from armstrong.hatband.options import BackboneInline
+from armstrong.hatband.forms import OrderableGenericKeyLookupForm
+
 from . import models
 
 
@@ -10,20 +13,25 @@ class NodeAdmin(VersionAdmin):
     pass
 
 
-class NodeGrappelli(VersionAdmin):
-    related_lookup_fields = [
-        ['content_type', 'object_id',]
-    ]
+class NodeInlineAdminForm(OrderableGenericKeyLookupForm):
+    class Media:
+        js = (
+                'hatband/js/jquery-ui-1.8.16.min.js',
+                'arm_wells/js/well-node-inline.js',
+              )
+        css = {'all': ('arm_wells/css/well-node-inline.css',
+                       'hatband/css/jquery/ui-lightness/jquery-ui-1.8.16.custom.css',)}
 
 
-class NodeInline(admin.TabularInline):
+class NodeInline(BackboneInline):
+    template = 'arm_wells/admin/well-node-inline.html'
+    form = NodeInlineAdminForm
     model = models.Node
-    extra = 1
 
     # This is for Grappelli
     sortable_field_name = "order"
     related_lookup_fields = {
-        'generic': ['content_type', 'object_id',]
+        'generic': ['content_type', 'object_id', ]
     }
 
 
@@ -38,8 +46,6 @@ class WellTypeAdmin(VersionAdmin):
     pass
 
 
-node_admin_class = NodeGrappelli if 'grappelli' in settings.INSTALLED_APPS \
-        else NodeAdmin
-admin.site.register(models.Node, node_admin_class)
+admin.site.register(models.Node, NodeAdmin)
 admin.site.register(models.Well, WellAdmin)
 admin.site.register(models.WellType, WellTypeAdmin)

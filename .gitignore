@@ -1,3 +1,9 @@
 *.pyc
 *~
 *.swp
+coverage/*
+build/*
+mydatabase
+docs/_build/*
+MANIFEST
+dist/

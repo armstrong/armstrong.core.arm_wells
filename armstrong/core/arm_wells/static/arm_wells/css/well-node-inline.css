@@ -1,0 +1,13 @@
+.node-inline {
+    padding: 10px;
+    margin:10px;
+    border: 1px grey dashed;
+}
+
+.node-inline .delete {
+    display: inline;
+}
+
+.gfkWrapper {
+    margin:10px;
+}
