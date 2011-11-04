@@ -12,6 +12,10 @@ def requires_prep(func):
     return wrapper
 
 
+class FilterException(Exception):
+    pass
+
+
 class MergeQuerySet(object):
     """
     This class provides a queryset-like object that merges two querysets
@@ -57,6 +61,12 @@ class MergeQuerySet(object):
             return self.queryset2[i - len(self.queryset)]
         else:
             raise IndexError("list index out of range")
+
+    def filter(self, *args, **kwargs):
+        if not self.needs_prep:
+            raise FilterException("Filter called after queryset already merged")
+        return MergeQuerySet(self.queryset.filter(*args, **kwargs),
+                self.queryset2.filter(*args, **kwargs))
 
     @requires_prep
     def count(self):
@@ -135,9 +145,17 @@ class GenericForeignKeyQuerySet(object):
     def __len__(self):
         return len(self.content)
 
+    def count(self):
+        return self.__len__()
+
     @requires_prep
     def __getitem__(self, i):
         return self.content.__getitem__(i)
+
+    def filter(self, *args, **kwargs):
+        if kwargs:
+            raise FilterException("GenericForeignKeyQuerySets cannot be filtered")
+        return self
 
     def __getattr__(self, key):
         try:
