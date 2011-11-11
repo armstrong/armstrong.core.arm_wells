@@ -8,4 +8,6 @@ env:
 script:
   - fab test
 notifications:
-  irc: "irc.freenode.org#armstrongcms"
+  email: false
+  irc:
+    - "irc.freenode.org#armstrongcms"
