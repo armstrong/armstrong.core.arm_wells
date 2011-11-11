@@ -1,0 +1,13 @@
+rvm:
+   - 1.9.3
+before_script:
+  - sudo pip install -r requirements/dev.txt
+  - sudo pip install .
+env:
+  - SKIP_COVERAGE=1 SKIP_INSTALL=1
+script:
+  - fab test
+notifications:
+  email: false
+  irc:
+    - "irc.freenode.net#armstrongcms"
