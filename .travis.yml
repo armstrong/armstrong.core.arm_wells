@@ -7,3 +7,5 @@ env:
   - SKIP_COVERAGE=1 SKIP_INSTALL=1
 script:
   - fab test
+notifications:
+  irc: "irc.freenode.org#armstrongcms"
