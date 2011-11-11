@@ -1,7 +1,6 @@
 rvm:
    - 1.9.3
 before_script:
-  - sudo pip install -e git://github.com/tswicegood/armstrong.dev.git@env#egg=armstrong.dev.git
   - sudo pip install -r requirements/dev.txt
   - sudo pip install .
 env:
