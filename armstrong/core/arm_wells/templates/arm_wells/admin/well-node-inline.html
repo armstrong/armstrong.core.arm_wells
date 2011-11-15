@@ -25,6 +25,7 @@
         armstrong.widgets.generickey($, {
           facetURL: "{% url admin:generic_key_facets %}",
           queryLookupURL: "{% url admin:type_and_model_to_query %}",
+          baseLookupURL: "{% url admin:index %}",
           id: "id_{{ namespace }}-__prefix__-object_id",
           searchDone: function(app) {
             {{ namespace }}EmptyForm.trigger('createObject');
