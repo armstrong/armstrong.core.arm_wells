@@ -1,2 +1,0 @@
-django-grappelli
-django-chunks
