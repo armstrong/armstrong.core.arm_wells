@@ -81,7 +81,7 @@ class MergeQuerySet(object):
         if i >= qs_len:
             start = i - qs_len
             return self.queryset2[start:end]
-        return itertools.chain(self.queryset[i:], self.queryset2[0:end])
+        return list(itertools.chain(self.queryset[i:], self.queryset2[0:end]))
 
     def __getattr__(self, key):
         try:

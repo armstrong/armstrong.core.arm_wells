@@ -244,3 +244,11 @@ class MergeQuerySetTestCase(TestCase):
         merge_qs = MergeQuerySet(self.qs_a.all(), self.qs_b.all())
         filtered = merge_qs.filter(id__lte=2)
         self.assertEqual(len(filtered), 2)
+
+    def test_is_slicable(self):
+        merge_qs = MergeQuerySet(self.qs_a.all(), self.qs_b.all())
+        sliced = merge_qs[0:self.number_in_a + 2]
+        try:
+            obj = sliced[1]
+        except TypeError:
+            self.fail("Threw a TypeError")
