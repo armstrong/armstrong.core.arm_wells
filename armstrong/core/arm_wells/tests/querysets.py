@@ -213,6 +213,12 @@ class MergeQuerySetTestCase(TestCase):
         self.assertEqual(merge_qs.count(),
                 len(merge_qs))
 
+    def test_count_does_not_call_length_on_queryset2(self):
+        merge_qs = MergeQuerySet(self.qs_a.all(), self.qs_b.all())
+        merge_qs.count()
+        with self.assertNumQueries(1):
+            len(merge_qs)
+
     def test_story_models_are_first(self):
         merge_qs = MergeQuerySet(self.qs_a.all(), self.qs_b.all())
         qs_a_copy = self.qs_a.all()
