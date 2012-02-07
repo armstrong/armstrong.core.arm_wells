@@ -70,7 +70,7 @@ class MergeQuerySet(object):
 
     @requires_prep
     def count(self):
-        return self.__len__()
+        return self.queryset.count() + self.queryset2.count()
 
     @requires_prep
     def __getslice__(self, i, j):
@@ -90,7 +90,7 @@ class MergeQuerySet(object):
             if key != 'queryset' and hasattr(QuerySet, key):
                 raise NotImplementedError()
             raise
-
+    
 
 class GenericForeignKeyQuerySet(object):
     def __init__(self, queryset, gfk='content_object'):
