@@ -43,7 +43,7 @@ class Well(models.Model):
 
     @property
     def items(self):
-        node_qs = GenericForeignKeyQuerySet(self.nodes.all().select_related())
+        node_qs = GenericForeignKeyQuerySet(self.nodes.all())
         if self.queryset is None:
             return node_qs
         else:
