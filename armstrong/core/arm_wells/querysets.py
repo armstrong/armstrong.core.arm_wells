@@ -2,6 +2,7 @@ from functools import wraps
 from django.db.models.query import QuerySet
 import itertools
 
+
 def requires_prep(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
@@ -90,7 +91,7 @@ class MergeQuerySet(object):
             if key != 'queryset' and hasattr(QuerySet, key):
                 raise NotImplementedError()
             raise
-    
+
 
 class GenericForeignKeyQuerySet(object):
     def __init__(self, queryset, gfk='content_object'):

@@ -1,4 +1,3 @@
-from django.core.paginator import Paginator
 import random
 
 from .arm_wells_support.models import *
@@ -24,10 +23,12 @@ class GenericForeignKeyQuerySetTestCase(TestCase):
         for i in range(self.number_of_extra_stories):
             self.extra_stories.append(generate_random_story())
 
-    def test_raises_NotImplementedError_on_exclude(self):
+    def test_raises_NotImplementedError_on_all_and_exclude(self):
+        gfk_qs = GenericForeignKeyQuerySet(self.well.nodes.all()\
+                .select_related())
         with self.assertRaises(NotImplementedError):
-            gfk_qs = GenericForeignKeyQuerySet(self.well.nodes.all()\
-                    .select_related())
+            gfk_qs.all()
+        with self.assertRaises(NotImplementedError):
             gfk_qs.exclude()
 
     def test_raises_NotImplementedError_on_misc_functions(self):
@@ -49,7 +50,6 @@ class GenericForeignKeyQuerySetTestCase(TestCase):
                 .select_related())
         with self.assertRaises(AttributeError):
             getattr(gfk_qs, "unknown_and_unknowable")
-
 
     def test_gathers_all_nodes_of_one_type_with_two_queries(self):
         gfk_qs = GenericForeignKeyQuerySet(self.well.nodes.all()\
@@ -162,7 +162,8 @@ class GenericForeignKeyQuerySetTestCase(TestCase):
 
         queryset = well.items
         with self.assertRaises(FilterException):
-            self.assertEqual(3, len(queryset.filter(title__in=['foo','bar'])))
+            self.assertEqual(3, len(queryset.filter(title__in=['foo', 'bar'])))
+
 
 class MergeQuerySetTestCase(TestCase):
     def setUp(self):
@@ -178,9 +179,11 @@ class MergeQuerySetTestCase(TestCase):
             generate_random_image()
         self.qs_b = Image.objects.all()
 
-    def test_raises_NotImplementedError_on_exclude(self):
+    def test_raises_NotImplementedError_on_all_and_exclude(self):
+        merge_qs = MergeQuerySet(self.qs_a, self.qs_b)
         with self.assertRaises(NotImplementedError):
-            merge_qs = MergeQuerySet(self.qs_a, self.qs_b)
+            merge_qs.all()
+        with self.assertRaises(NotImplementedError):
             merge_qs.exclude()
 
     def test_raises_NotImplementedError_on_misc_functions(self):
