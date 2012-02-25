@@ -24,7 +24,8 @@ class GenericForeignKeyQuerySetTestCase(TestCase):
             self.extra_stories.append(generate_random_story())
 
     def test_raises_NotImplementedError_on_all_and_exclude(self):
-        gfk_qs = GenericForeignKeyQuerySet(self.well.nodes.all())
+        gfk_qs = GenericForeignKeyQuerySet(self.well.nodes.all()\
+                .select_related())
         with self.assertRaises(NotImplementedError):
             gfk_qs.all()
         with self.assertRaises(NotImplementedError):
@@ -37,25 +38,29 @@ class GenericForeignKeyQuerySetTestCase(TestCase):
                 'select_related', 'dup_select_related', 'annotate', 'order_by',
                 'distinct', 'extra', 'reverse', 'defer', 'only', 'using',
                 'ordered', ]
-        gfk_qs = GenericForeignKeyQuerySet(self.well.nodes.all())
+        gfk_qs = GenericForeignKeyQuerySet(self.well.nodes.all()\
+                .select_related())
         for func in funcs_to_test:
             with self.assertRaises(NotImplementedError):
                 getattr(gfk_qs, func)()
 
     def test_raises_AttributeError_on_unknown_attribute(self):
         """Necessary because of the NotImplementedError code"""
-        gfk_qs = GenericForeignKeyQuerySet(self.well.nodes.all())
+        gfk_qs = GenericForeignKeyQuerySet(self.well.nodes.all()\
+                .select_related())
         with self.assertRaises(AttributeError):
             getattr(gfk_qs, "unknown_and_unknowable")
 
     def test_gathers_all_nodes_of_one_type_with_two_queries(self):
-        gfk_qs = GenericForeignKeyQuerySet(self.well.nodes.all())
+        gfk_qs = GenericForeignKeyQuerySet(self.well.nodes.all()\
+                .select_related())
         with self.assertNumQueries(2):
             node_models = gfk_qs[0:self.number_in_well]
 
     def test_gathers_all_nodes_of_two_types_with_three_queries(self):
         add_n_random_images_to_well(self.number_in_well, self.well)
-        gfk_qs = GenericForeignKeyQuerySet(self.well.nodes.all())
+        gfk_qs = GenericForeignKeyQuerySet(self.well.nodes.all()\
+                .select_related())
         with self.assertNumQueries(3):
             node_models = gfk_qs[0:self.number_in_well * 2]
 
@@ -103,7 +108,7 @@ class GenericForeignKeyQuerySetTestCase(TestCase):
         for i in range(num_nodes):
             OddNode.objects.create(baz=generate_random_story())
         gfk_qs = GenericForeignKeyQuerySet(
-                    OddNode.objects.all(),
+                    OddNode.objects.all().select_related(),
                     gfk='baz'
                 )
         with self.assertNumQueries(2):
@@ -116,7 +121,7 @@ class GenericForeignKeyQuerySetTestCase(TestCase):
             OddNode.objects.create(baz=generate_random_story())
         with self.assertRaises(ValueError):
             gfk_qs = GenericForeignKeyQuerySet(
-                        OddNode.objects.all(),
+                        OddNode.objects.all().select_related(),
                         gfk='bad_field_name'
                     )
 
