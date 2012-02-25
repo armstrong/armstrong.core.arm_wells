@@ -1,23 +1,14 @@
 import datetime
-import fudge
-from fudge.inspector import arg
 import random
 
 from .arm_wells_support.models import Story
-from ._utils import add_n_random_stories_to_well
-from ._utils import generate_random_story
-from ._utils import generate_random_image
-from ._utils import generate_random_story_child
-from ._utils import generate_random_well
-from ._utils import generate_random_welltype
-from ._utils import TestCase
+from ._utils import TestCase, \
+                    add_n_random_stories_to_well, \
+                    generate_random_story, \
+                    generate_random_well, \
+                    generate_random_welltype
 
-from ..models import Node
-from ..models import Well
-from ..models import WellType
-from .. import models
-
-from django.template.context import Context
+from ..models import WellType, Well, Node
 
 
 class WellTestCase(TestCase):
