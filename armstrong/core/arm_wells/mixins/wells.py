@@ -52,7 +52,7 @@ class WellMixin(models.Model):
 
     @property
     def items(self):
-        node_qs = GenericForeignKeyQuerySet(self.nodes.all())
+        node_qs = GenericForeignKeyQuerySet(self.nodes.all().select_related())
         if self.queryset is None:
             return node_qs
         else:
