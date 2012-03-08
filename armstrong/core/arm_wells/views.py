@@ -32,7 +32,9 @@ class SimpleWellView(TemplateView):
 
 class QuerySetBackedWellView(SimpleWellView, MultipleObjectMixin):
     def get_queryset(self):
-        return self.get_well().items
+        well = self.get_well()
+        return (well.items if well is not False
+                else super(QuerySetBackedWellView, self).get_queryset())
 
     def get_well(self):
         well = super(QuerySetBackedWellView, self).get_well()

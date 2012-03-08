@@ -97,3 +97,16 @@ class QuerySetBackedWellViewTest(SimpleWellViewTest):
         queryset = view.get_queryset()
         expected = number_of_stories + self.number_in_well
         self.assertEqual(expected, len(queryset))
+
+    def test_get_queryset_returns_raw_queryset_if_there_is_an_empty_well(self):
+        kwargs = self.default_kwargs()
+        kwargs.update({
+            "allow_empty": True,
+            "well_title": "Unknown and Unkowable",
+        })
+        view = self.view_class(**kwargs)
+        stories = Story.objects.all()
+        queryset = view.get_queryset()
+        self.assertEqual(len(stories), len(queryset))
+        for story in stories:
+            self.assert_(story in queryset)
