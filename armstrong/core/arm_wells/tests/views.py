@@ -102,7 +102,7 @@ class QuerySetBackedWellViewTest(SimpleWellViewTest):
         kwargs = self.default_kwargs()
         kwargs.update({
             "allow_empty": True,
-            "well_title": "Unknown and Unkowable",
+            "well_title": "Unknown and Unknowable",
         })
         view = self.view_class(**kwargs)
         stories = Story.objects.all()
