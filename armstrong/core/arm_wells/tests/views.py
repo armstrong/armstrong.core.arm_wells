@@ -15,20 +15,26 @@ from ..views import SimpleWellView
 from ..views import QuerySetBackedWellView
 
 
-class WellViewTestCase(TestCase):
-    def setUp(self):
-        super(WellViewTestCase, self).setUp()
-        self.well = generate_random_well()
-
-
-class SimpleWellViewTest(WellViewTestCase):
+class SimpleWellViewTest(TestCase):
     view_class = SimpleWellView
+
+    def setUp(self):
+        super(SimpleWellViewTest, self).setUp()
+        self.factory = RequestFactory()
+        self.well = generate_random_well()
 
     def default_kwargs(self):
         return {
             "template_name": "index.html",
             "well_title": self.well.title,
         }
+
+    def assertInContext(self, var_name, other, template_or_context):
+        # TODO: support passing in a straight "context" (i.e., dict)
+        context = template_or_context.context_data
+        self.assertTrue(var_name in context,
+                msg="`%s` not in provided context" % var_name)
+        self.assertEqual(context[var_name], other)
 
     def test_raises_exception_without_template_name_param(self):
         kwargs = self.default_kwargs()
