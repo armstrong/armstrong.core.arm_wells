@@ -1,18 +1,15 @@
-from django.core.exceptions import ImproperlyConfigured
-from django.db.models.query import QuerySet
-from django.http import HttpRequest
-from django.test.client import RequestFactory
-import fudge
 import random
 
-from .arm_wells_support.models import Story
-from ._utils import add_n_random_stories_to_well
-from ._utils import generate_random_story
-from ._utils import generate_random_well
-from ._utils import TestCase
+from django.core.exceptions import ImproperlyConfigured
+from django.test.client import RequestFactory
 
-from ..views import SimpleWellView
-from ..views import QuerySetBackedWellView
+from .arm_wells_support.models import Story
+from ._utils import (TestCase,
+                     add_n_random_stories_to_well,
+                     generate_random_story,
+                     generate_random_well)
+
+from ..views import SimpleWellView, QuerySetBackedWellView
 
 
 class SimpleWellViewTest(TestCase):

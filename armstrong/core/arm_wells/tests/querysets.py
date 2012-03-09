@@ -1,10 +1,12 @@
-from django.core.paginator import Paginator
 import random
 
 from .arm_wells_support.models import *
-from ._utils import (add_n_random_stories_to_well, add_n_random_images_to_well,
-        generate_random_image, generate_random_story, generate_random_well,
-        TestCase)
+from ._utils import (TestCase,
+                     add_n_random_stories_to_well,
+                     add_n_random_images_to_well,
+                     generate_random_image,
+                     generate_random_story,
+                     generate_random_well)
 
 from ..querysets import (GenericForeignKeyQuerySet, MergeQuerySet,
         FilterException)
@@ -105,7 +107,7 @@ class GenericForeignKeyQuerySetTestCase(TestCase):
         self.assertEqual(2, len(queryset))
 
     def test_non_standard_node(self):
-        num_nodes = random.randint(3,5)
+        num_nodes = random.randint(3, 5)
         for i in range(num_nodes):
             OddNode.objects.create(baz=generate_random_story())
         gfk_qs = GenericForeignKeyQuerySet(
@@ -117,14 +119,14 @@ class GenericForeignKeyQuerySetTestCase(TestCase):
                 self.assertEqual(obj.__class__, Story)
 
     def test_non_standard_node_failure(self):
-        num_nodes = random.randint(3,5)
+        num_nodes = random.randint(3, 5)
         for i in range(num_nodes):
             OddNode.objects.create(baz=generate_random_story())
         with self.assertRaises(ValueError):
-            gfk_qs = GenericForeignKeyQuerySet(
-                        OddNode.objects.all().select_related(),
-                        gfk='bad_field_name'
-                    )
+            GenericForeignKeyQuerySet(
+                OddNode.objects.all().select_related(),
+                gfk='bad_field_name'
+            )
 
     def test_works_with_duplicate_nodes(self):
         well = generate_random_well()
@@ -163,7 +165,8 @@ class GenericForeignKeyQuerySetTestCase(TestCase):
 
         queryset = well.items
         with self.assertRaises(FilterException):
-            self.assertEqual(3, len(queryset.filter(title__in=['foo','bar'])))
+            self.assertEqual(3, len(queryset.filter(title__in=['foo', 'bar'])))
+
 
 class MergeQuerySetTestCase(TestCase):
     def setUp(self):

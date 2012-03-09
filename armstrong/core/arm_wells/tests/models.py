@@ -110,7 +110,7 @@ class WellTestCase(TestCase):
         for node in well.nodes.all():
             self.assertEqual(node.content_object, well.items[i])
             i = i + 1
-        self.assertRaises(IndexError, lambda:well.items[i])
+        self.assertRaises(IndexError, lambda: well.items[i])
 
     def test_well_supports_indexing_with_merged_queryset(self):
         number_of_stories = random.randint(1, 5)
@@ -135,7 +135,7 @@ class WellTestCase(TestCase):
                 continue
             self.assertEqual(story, well.items[i])
             i = i + 1
-        self.assertRaises(IndexError, lambda:well.items[i])
+        self.assertRaises(IndexError, lambda: well.items[i])
 
 
 class NodeTestCase(TestCase):

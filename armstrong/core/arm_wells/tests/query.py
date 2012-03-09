@@ -1,12 +1,11 @@
 from django.core.paginator import Paginator
 import random
 
-from .arm_wells_support.models import Image, Story
-from ._utils import (add_n_random_stories_to_well, add_n_random_images_to_well,
-        generate_random_image, generate_random_story, generate_random_well,
-        TestCase)
-
-from ..models import Node
+from .arm_wells_support.models import Story
+from ._utils import (TestCase,
+                     add_n_random_stories_to_well,
+                     generate_random_story,
+                     generate_random_well)
 
 
 class SimpleMergedNodesAndQuerySetTests(TestCase):
@@ -18,7 +17,7 @@ class SimpleMergedNodesAndQuerySetTests(TestCase):
         add_n_random_stories_to_well(2, well)
 
         queryset = well.merge_with(Story.objects.all())
-        sliced = [a for a in queryset[slice(1,3)]]
+        sliced = [a for a in queryset[slice(1, 3)]]
         self.assertEqual(2, len(sliced))
 
     def test_merges_correctly_when_sliced_across_the_well_content(self):
