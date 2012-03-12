@@ -26,13 +26,6 @@ class SimpleWellViewTest(TestCase):
             "well_title": self.well.title,
         }
 
-    def assertInContext(self, var_name, other, template_or_context):
-        # TODO: support passing in a straight "context" (i.e., dict)
-        context = template_or_context.context_data
-        self.assertTrue(var_name in context,
-                msg="`%s` not in provided context" % var_name)
-        self.assertEqual(context[var_name], other)
-
     def test_raises_exception_without_template_name_param(self):
         kwargs = self.default_kwargs()
         del kwargs["template_name"]
