@@ -1,6 +1,7 @@
 import random
 
-from .._utils import TestCase
+from django.test import TestCase
+
 from .models import Story
 
 

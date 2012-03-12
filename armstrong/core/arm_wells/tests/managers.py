@@ -1,6 +1,7 @@
 import datetime
 
 from ._utils import TestCase
+
 from ..models import WellType, Well
 
 
