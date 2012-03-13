@@ -8,4 +8,7 @@ script: fab test
 notifications:
   email: false
   irc:
-    - "irc.freenode.net#armstrongcms"
+    on_success: change
+    on_failure: always
+    channels:
+      - "irc.freenode.net#armstrongcms"
