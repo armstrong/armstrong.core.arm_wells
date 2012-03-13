@@ -21,7 +21,7 @@ class SimpleWellView(TemplateView):
             return Well.objects.get_current(title=self.well_title)
         except Well.DoesNotExist:
             if self.allow_empty:
-                return False
+                return None
             raise
 
     def get_context_data(self, **kwargs):
@@ -33,7 +33,7 @@ class SimpleWellView(TemplateView):
 class QuerySetBackedWellView(SimpleWellView, MultipleObjectMixin):
     def get_queryset(self):
         well = self.get_well()
-        return (well.items if well is not False
+        return (well.items if well is not None
                 else super(QuerySetBackedWellView, self).get_queryset())
 
     def get_well(self):
