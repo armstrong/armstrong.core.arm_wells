@@ -26,11 +26,15 @@ class GenericForeignKeyQuerySetTestCase(TestCase):
         for i in range(self.number_of_extra_stories):
             self.extra_stories.append(generate_random_story())
 
-    def test_raises_NotImplementedError_on_all_and_exclude(self):
+    def test_raises_NotImplementedError_on_all(self):
         gfk_qs = GenericForeignKeyQuerySet(self.well.nodes.all()\
                 .select_related())
         with self.assertRaises(NotImplementedError):
             gfk_qs.all()
+
+    def test_raises_NotImplementedError_on_exclude(self):
+        gfk_qs = GenericForeignKeyQuerySet(self.well.nodes.all()\
+                .select_related())
         with self.assertRaises(NotImplementedError):
             gfk_qs.exclude()
 
@@ -182,10 +186,13 @@ class MergeQuerySetTestCase(TestCase):
             generate_random_image()
         self.qs_b = Image.objects.all()
 
-    def test_raises_NotImplementedError_on_all_and_exclude(self):
+    def test_raises_NotImplementedError_on_all(self):
         merge_qs = MergeQuerySet(self.qs_a, self.qs_b)
         with self.assertRaises(NotImplementedError):
             merge_qs.all()
+
+    def test_raises_NotImplementedError_on_exclude(self):
+        merge_qs = MergeQuerySet(self.qs_a, self.qs_b)
         with self.assertRaises(NotImplementedError):
             merge_qs.exclude()
 
