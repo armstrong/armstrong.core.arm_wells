@@ -4,9 +4,6 @@ Provides the basic content well code necessary for scheduling and arranging
 models inside Armstrong. Conceptually, a well is an ordered grouping of
 content that can expire.
 
-.. warning:: This is development level software.  Please do not unless you are
-             familiar with what that means and are comfortable using that type
-             of software.
 
 Installation
 ------------
@@ -130,7 +127,7 @@ State of Project
 Armstrong is an open-source news platform that is freely available to any
 organization.  It is the result of a collaboration between the `Texas Tribune`_
 and `Bay Citizen`_, and a grant from the `John S. and James L. Knight
-Foundation`_.  The first release is scheduled for June, 2011.
+Foundation`_.
 
 To follow development, be sure to join the `Google Group`_.
 
