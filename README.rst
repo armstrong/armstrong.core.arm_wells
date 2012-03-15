@@ -1,24 +1,18 @@
 armstrong.core.arm_wells
 ========================
 Provides the basic content well code necessary for scheduling and arranging
-models inside Armstrong. Conceptually, a well is an ordered grouping of
-content that can expire.
+models inside Armstrong.
 
-.. warning:: This is development level software.  Please do not unless you are
-             familiar with what that means and are comfortable using that type
-             of software.
-
-Installation
-------------
-
-::
-
-    NAME=armstrong.core.arm_wells
-    pip install -e git://github.com/armstrong/$NAME.git#egg=$NAME
+You can use wells to change the order of content.  They are meant to be
+combined with querysets to allow your users to control what appears first in a
+list of content.
 
 
-Introduction
-------------
+.. The Usage section below should be refactored with most of the content pulled
+   out into real documentation.
+
+Usage
+-----
 Wells are one of the most powerful components in Armstrong; they are
 fundamentally about the ordering and structuring of content.
 
@@ -39,7 +33,7 @@ GenericForeignKey.
 
 
 Ordering Arbitrary Content
---------------------------
+""""""""""""""""""""""""""
 The simplest way to use wells is with just one Well object associated
 with a WellType. Changing the content of that Well or how that content is
 ordered will immediately change what is displayed on the site.
@@ -60,7 +54,7 @@ reorder on the site is a good candidate for wells.
 
 
 Scheduling
-----------
+""""""""""
 The other major aspect to Wells is scheduling. If the editorial staff wants to
 plan the front page for Thursday at 5pm, they can create a new Well with the
 'front_page' WellType and the content they want displayed. By setting the new
@@ -77,7 +71,7 @@ name and fetches the Well associated with that WellType, has the most recent
 pub_date in the past and doesn't have an expires in the past.
 
 Using a QuerySetBackedWellView
-------------------------------
+""""""""""""""""""""""""""""""
 Wells can also be backed by a queryset which will be used as a source of
 additional content after all items have been exhausted. Currently, this is not
 configurable via the admin, but can be easily accomplished by using the
@@ -100,7 +94,7 @@ to render every item in a well using the 'standard' layout::
     {% endfor %}
 
 Admin Customization
--------------------
+"""""""""""""""""""
 The admin view for modifying a well has been customized to provide a drag and
 drop interface for ordering Node's. To add a Node to a well, use the
 VisualSearch box to first search for a ContentType and then for the title of
@@ -114,6 +108,29 @@ information about it's ContentType id and object id. It also sends a request to
 the server for the html result of a render_model call with the 'preview' name.
 This allows you to easily display the nodes in a manner similar to how those
 objects will display on the site.
+
+
+Installation & Configuration
+----------------------------
+You can install the latest release of ``armstrong.core.arm_wells`` using `pip`_:
+
+::
+
+    pip install armstrong.core.arm_wells
+
+Make sure to add ``armstrong.core.arm_wells`` to your ``INSTALLED_APPS``.  You
+can add this however you like.  This works as a copy-and-paste solution:
+
+::
+
+	INSTALLED_APPS += ["armstrong.core.arm_wells", ]
+
+Once installed, you have to run either ``syncdb`` or ``migrate`` if you are
+using `South`_.
+
+.. _pip: http://www.pip-installer.org/
+.. _South: http://south.aeracode.org/
+
 
 Contributing
 ------------
@@ -130,7 +147,7 @@ State of Project
 Armstrong is an open-source news platform that is freely available to any
 organization.  It is the result of a collaboration between the `Texas Tribune`_
 and `Bay Citizen`_, and a grant from the `John S. and James L. Knight
-Foundation`_.  The first release is scheduled for June, 2011.
+Foundation`_.
 
 To follow development, be sure to join the `Google Group`_.
 
@@ -140,7 +157,7 @@ probably looking for that.
 
 License
 -------
-Copyright 2011 Bay Citizen and Texas Tribune
+Copyright 2011-2012 Bay Citizen and Texas Tribune
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
