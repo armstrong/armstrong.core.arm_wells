@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 
-from ...models import WellBase, WellNodeBase, WellTypeBase, WellType
+from ...models import WellBase, NodeBase, WellTypeBase, WellType
 
 
 class Content(models.Model):
@@ -35,7 +35,7 @@ class MissingFieldWell(WellBase):
     pass
 
 
-class MissingFieldWellNode(WellNodeBase):
+class MissingFieldWellNode(NodeBase):
     # missing the `well` field
     pass
 
@@ -44,7 +44,7 @@ class NewWell(WellBase):
     type = models.ForeignKey(WellType)
 
 
-class NewNode(WellNodeBase):
+class NewNode(NodeBase):
     well = models.ForeignKey(NewWell, related_name="nodes")
 
 
@@ -52,7 +52,7 @@ class WrongRelationWell(WellBase):
     type = models.ForeignKey(WellType)
 
 
-class WrongRelationNode(WellNodeBase):
+class WrongRelationNode(NodeBase):
     well = models.ForeignKey(WrongRelationWell, related_name="foo")
 
 
