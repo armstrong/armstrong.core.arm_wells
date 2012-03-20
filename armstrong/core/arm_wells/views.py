@@ -7,6 +7,7 @@ from .models import Well
 
 
 class SimpleWellView(TemplateView):
+    allow_empty = False
     well_title = None
 
     def __init__(self, *args, **kwargs):
@@ -16,7 +17,12 @@ class SimpleWellView(TemplateView):
                     _(u"Expects a `well_title` to be provided"))
 
     def get_well(self):
-        return Well.objects.get_current(title=self.well_title)
+        try:
+            return Well.objects.get_current(title=self.well_title)
+        except Well.DoesNotExist:
+            if self.allow_empty:
+                return None
+            raise
 
     def get_context_data(self, **kwargs):
         context = super(SimpleWellView, self).get_context_data(**kwargs)
@@ -26,10 +32,12 @@ class SimpleWellView(TemplateView):
 
 class QuerySetBackedWellView(SimpleWellView, MultipleObjectMixin):
     def get_queryset(self):
-        return self.get_well().items
+        well = self.get_well()
+        return (well.items if well is not None
+                else super(QuerySetBackedWellView, self).get_queryset())
 
     def get_well(self):
         well = super(QuerySetBackedWellView, self).get_well()
-        well.merge_with(super(QuerySetBackedWellView, self).get_queryset())
+        if well:
+            well.merge_with(super(QuerySetBackedWellView, self).get_queryset())
         return well
-
