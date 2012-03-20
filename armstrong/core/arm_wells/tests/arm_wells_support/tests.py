@@ -10,4 +10,4 @@ class StoryTestCase(TestCase):
         title = "Some Random Title %d" % random.randint(100, 200)
         story = Story(title=title)
 
-        self.assertEqual(title, str(story))
+        self.assertEqual(title, str(story), msg="sanity check")

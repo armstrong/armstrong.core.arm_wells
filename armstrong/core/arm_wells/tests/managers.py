@@ -2,8 +2,7 @@ import datetime
 
 from ._utils import TestCase
 
-from ..models import Well
-from ..models import WellType
+from ..models import WellType, Well
 
 
 class WellManagerTestCase(TestCase):

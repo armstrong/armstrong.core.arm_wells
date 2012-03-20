@@ -1,2 +1,1 @@
--r ./base.txt
-armstrong.dev>=1.4
+armstrong.dev>=1.11.0
