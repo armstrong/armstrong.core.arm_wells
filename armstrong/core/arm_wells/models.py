@@ -82,11 +82,11 @@ class WellBase(models.Model):
         return self.items
 
 
-class WellNodeBase(models.Model):
+class NodeBase(models.Model):
     """
-    Abstract WellNode
+    Abstract Node
 
-    Provides all the functionality of a WellNode but lacks the
+    Provides all the functionality of a Node but lacks the
     relationship to the actual Well.
 
     Requirements:
@@ -135,11 +135,11 @@ class Well(WellBase):
     type = models.ForeignKey(WellType)
 
 
-class Node(WellNodeBase):
+class Node(NodeBase):
     """
-    Provides a concrete implementation of the ``WellNodeBase`` class.
+    Provides a concrete implementation of the ``NodeBase`` class.
 
-    Adds the required relation of the WellNode to the Well.
+    Adds the required relation of the Node to the Well.
 
     """
     well = models.ForeignKey(Well, related_name="nodes")
