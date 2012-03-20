@@ -8,7 +8,7 @@ from .managers import WellManager
 from .querysets import MergeQuerySet, GenericForeignKeyQuerySet
 
 
-class BaseWellType(models.Model):
+class WellTypeBase(models.Model):
     """
     Abstract WellType
 
@@ -26,7 +26,7 @@ class BaseWellType(models.Model):
         return self.title
 
 
-class BaseWell(models.Model):
+class WellBase(models.Model):
     """
     Abstract Well
 
@@ -53,7 +53,7 @@ class BaseWell(models.Model):
         abstract = True
 
     def __init__(self, *args, **kwargs):
-        super(BaseWell, self).__init__(*args, **kwargs)
+        super(WellBase, self).__init__(*args, **kwargs)
         self.queryset = None
 
     @property
@@ -67,7 +67,7 @@ class BaseWell(models.Model):
     def save(self, *args, **kwargs):
         if not self.pub_date:
             self.pub_date = datetime.datetime.now()
-        return super(BaseWell, self).save(*args, **kwargs)
+        return super(WellBase, self).save(*args, **kwargs)
 
     @property
     def items(self):
@@ -82,7 +82,7 @@ class BaseWell(models.Model):
         return self.items
 
 
-class BaseWellNode(models.Model):
+class WellNodeBase(models.Model):
     """
     Abstract WellNode
 
@@ -117,17 +117,17 @@ class BaseWellNode(models.Model):
 #
 # Concrete implementations
 #
-class WellType(BaseWellType):
+class WellType(WellTypeBase):
     """
-    Provides a concrete implementation of the ``BaseWellType`` class.
+    Provides a concrete implementation of the ``WellTypeBase`` class.
 
     """
     pass
 
 
-class Well(BaseWell):
+class Well(WellBase):
     """
-    Provides a concrete implementation of the ``BaseWell`` class.
+    Provides a concrete implementation of the ``WellBase`` class.
 
     Adds the required relation of the Well to the WellType.
 
@@ -135,9 +135,9 @@ class Well(BaseWell):
     type = models.ForeignKey(WellType)
 
 
-class Node(BaseWellNode):
+class Node(WellNodeBase):
     """
-    Provides a concrete implementation of the ``BaseWellNode`` class.
+    Provides a concrete implementation of the ``WellNodeBase`` class.
 
     Adds the required relation of the WellNode to the Well.
 
