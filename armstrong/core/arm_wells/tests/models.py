@@ -4,17 +4,13 @@ import random
 from django.db.utils import IntegrityError
 from django.core.exceptions import ObjectDoesNotExist
 
-from ._utils import (TestCase,
-                     add_n_random_stories_to_well,
-                     generate_random_well,
-                     generate_random_welltype,
-                     generate_random_story)
+from ._utils import (TestCase, add_n_random_stories_to_well,
+        generate_random_well, generate_random_welltype, generate_random_story)
 
 from ..models import WellType, Well, Node
 from .arm_wells_support.models import (MissingFieldWell, MissingFieldWellNode,
-                                       Story, NewWell, NewNode,
-                                       DifferentWell, DifferentWellType,
-                                       WrongRelationWell, WrongRelationNode)
+        Story, NewWell, NewNode, DifferentWell, DifferentWellType,
+        WrongRelationWell, WrongRelationNode)
 
 
 #
@@ -70,13 +66,13 @@ class BaseWellNodeTestCase(TestCase):
 class SubclassesTestCase(TestCase):
     def setUp(self):
         self.well = NewWell.objects.create(type=generate_random_welltype())
-        self.node1 = NewNode.objects.create(content_object=generate_random_story(),
-                                            well=self.well,
-                                            order=100)
+        self.node1 = NewNode.objects.create(
+                content_object=generate_random_story(), well=self.well,
+                order=100)
 
-        self.node2 = NewNode.objects.create(content_object=generate_random_story(),
-                                            well=self.well,
-                                            order=9)
+        self.node2 = NewNode.objects.create(
+                content_object=generate_random_story(), well=self.well,
+                order=9)
 
     def test_has_correct_relations(self):
         self.assertEqual(WellType, type(self.well.type))
@@ -118,12 +114,10 @@ class SubclassesTestCase(TestCase):
                          self.well.nodes.all()[1].content_object)
 
     def test_has_broken_items_relation(self):
-        well = WrongRelationWell.objects.create(type=generate_random_welltype())
+        well = WrongRelationWell.objects.create(
+                type=generate_random_welltype())
         node = WrongRelationNode.objects.create(
-                content_object=generate_random_story(),
-                well=well,
-                order=1
-            )
+                content_object=generate_random_story(), well=well, order=1)
 
         with self.assertRaises(AttributeError):
             well.items
@@ -146,18 +140,16 @@ class WellTestCase(TestCase):
         r = random.randint(1, 10)
         for i in range(r):
             Node.objects.create(well=well,
-                                content_object=generate_random_story())
+                    content_object=generate_random_story())
 
         self.assertEqual(r, well.nodes.count())
 
     def test_nodes_are_sorted_by_order(self):
         well = generate_random_well()
         second = Node.objects.create(well=well,
-                                     content_object=generate_random_story(),
-                                     order=100)
+                content_object=generate_random_story(), order=100)
         first = Node.objects.create(well=well,
-                                    content_object=generate_random_story(),
-                                    order=10)
+                content_object=generate_random_story(), order=10)
 
         self.assertEqual(first, well.nodes.all()[0])
         self.assertEqual(second, well.nodes.all()[1])
@@ -262,7 +254,7 @@ class NodeTestCase(TestCase):
         well = generate_random_well()
         order = random.randint(100, 200)
         node = Node.objects.create(well=well, content_object=story,
-                                   order=order)
+                order=order)
 
         expected = "%s (%d): %s" % (well.title, order, story.title)
         self.assertEqual(expected, str(node))

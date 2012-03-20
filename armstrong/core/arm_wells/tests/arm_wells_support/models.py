@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 
-from ...models import BaseWell, BaseWellNode, BaseWellType, WellType
+from ...models import WellBase, NodeBase, WellTypeBase, WellType
 
 
 class Content(models.Model):
@@ -30,35 +30,35 @@ class OddNode(models.Model):
     baz = generic.GenericForeignKey('foo', 'bar')
 
 
-class MissingFieldWell(BaseWell):
+class MissingFieldWell(WellBase):
     # missing the `type` field
     pass
 
 
-class MissingFieldWellNode(BaseWellNode):
+class MissingFieldWellNode(NodeBase):
     # missing the `well` field
     pass
 
 
-class NewWell(BaseWell):
+class NewWell(WellBase):
     type = models.ForeignKey(WellType)
 
 
-class NewNode(BaseWellNode):
+class NewNode(NodeBase):
     well = models.ForeignKey(NewWell, related_name="nodes")
 
 
-class WrongRelationWell(BaseWell):
+class WrongRelationWell(WellBase):
     type = models.ForeignKey(WellType)
 
 
-class WrongRelationNode(BaseWellNode):
+class WrongRelationNode(NodeBase):
     well = models.ForeignKey(WrongRelationWell, related_name="foo")
 
 
-class DifferentWellType(BaseWellType):
+class DifferentWellType(WellTypeBase):
     pass
 
 
-class DifferentWell(BaseWell):
+class DifferentWell(WellBase):
     type = models.ForeignKey(DifferentWellType)
