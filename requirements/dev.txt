@@ -1,1 +1,2 @@
 armstrong.dev>=1.4
+armstrong.apps.articles>=1.0.1
