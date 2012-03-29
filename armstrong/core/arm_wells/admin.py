@@ -40,6 +40,7 @@ class WellAdmin(VersionAdmin):
     inlines = [
         NodeInline,
     ]
+    save_as = True
 
 
 class WellTypeAdmin(VersionAdmin):
