@@ -5,7 +5,7 @@ Node = Item.extend({
 NodeList = ItemList.extend({
     model: Node,
     comparator: function(node) {
-        return node.get("order");
+        return +node.get("order");
     }
 });
 
