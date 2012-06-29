@@ -7,6 +7,90 @@ from ..models import WellType
 
 
 class WellManagerTestCase(TestCase):
+    def test_get_current_returns_using_title_kwarg(self):
+        title_type = WellType.objects.create(title="well-title", slug="none")
+        slug_type = WellType.objects.create(title="none", slug="well-title")
+        title = Well.objects.create(type=title_type)
+        slug = Well.objects.create(type=slug_type)
+
+        self.assertEqual(title, Well.objects.get_current(title="well-title"))
+
+    def test_get_current_returns_using_slug_kwarg(self):
+        title_type = WellType.objects.create(title="well-slug", slug="none")
+        slug_type = WellType.objects.create(title="none", slug="well-slug")
+        title = Well.objects.create(type=title_type)
+        slug = Well.objects.create(type=slug_type)
+
+        self.assertEqual(slug, Well.objects.get_current(slug="well-slug"))
+
+    def test_get_current_should_default_to_title(self):
+        title_type = WellType.objects.create(title="well-title", slug="none")
+        slug_type = WellType.objects.create(title="none", slug="well-title")
+        title = Well.objects.create(type=title_type)
+        slug = Well.objects.create(type=slug_type)
+
+        self.assertEqual(title, Well.objects.get_current("well-title"))
+
+    def test_get_current_should_use_title_before_slug(self):
+        title_type = WellType.objects.create(title="well-title", slug="none")
+        slug_type = WellType.objects.create(title="none", slug="well-slug")
+        title = Well.objects.create(type=title_type)
+        slug = Well.objects.create(type=slug_type)
+
+        self.assertEqual(
+            title,
+            Well.objects.get_current(title="well-title", slug="well-slug")
+        )
+
+    def test_get_current_should_use_title_arg_before_slug_arg(self):
+        title_type = WellType.objects.create(title="well-title", slug="none")
+        slug_type = WellType.objects.create(title="none", slug="well-slug")
+        title = Well.objects.create(type=title_type)
+        slug = Well.objects.create(type=slug_type)
+
+        self.assertEqual(
+            title,
+            Well.objects.get_current("well-title", "well-slug")
+        )
+
+    def test_get_current_should_use_arg_before_slug(self):
+        title_type = WellType.objects.create(title="well-title", slug="none")
+        slug_type = WellType.objects.create(title="none", slug="well-slug")
+        title = Well.objects.create(type=title_type)
+        slug = Well.objects.create(type=slug_type)
+
+        self.assertEqual(
+            title,
+            Well.objects.get_current("well-title", slug="well-slug")
+        )
+
+    def test_get_current_should_raise_DoesNotExist_on_no_params(self):
+        type = WellType.objects.create(title="well-title", slug="well-slug")
+        well = Well.objects.create(type=type)
+
+        self.assertRaises(Well.DoesNotExist, Well.objects.get_current)
+
+    def test_get_current_should_raise_DoesNotExist_on_nonexistent_arg(self):
+        type = WellType.objects.create(title="none", slug="exists")
+        well = Well.objects.create(type=type)
+
+        self.assertRaises(Well.DoesNotExist, Well.objects.get_current,
+                          "exists")
+
+    def test_get_current_should_raise_DoesNotExist_on_nonexistent_title(self):
+        type = WellType.objects.create(title="none", slug="exists")
+        well = Well.objects.create(type=type)
+
+        self.assertRaises(Well.DoesNotExist, Well.objects.get_current,
+                          title="exists")
+
+    def test_get_current_should_raise_DoesNotExist_on_nonexistent_slug(self):
+        type = WellType.objects.create(title="exists", slug="none")
+        well = Well.objects.create(type=type)
+
+        self.assertRaises(Well.DoesNotExist, Well.objects.get_current,
+                          slug="exists")
+
     def test_get_current_returns_most_current_well(self):
         now = datetime.datetime.now()
         future_time = now + datetime.timedelta(minutes=10)
