@@ -116,4 +116,7 @@ class QuerySetBackedWellViewTest(SimpleWellViewTest):
         kwargs = self.default_kwargs()
         view = self.view_class.as_view(**kwargs)
         result = view(self.factory.get("/"))
-        self.assertInContext('object_list', kwargs['queryset'], result)
+        self.assertIn('object_list', result.context_data)
+        self.assertEqual(
+            list(result.context_data['object_list']),
+            list(self.well.items))
