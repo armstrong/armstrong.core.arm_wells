@@ -111,3 +111,9 @@ class QuerySetBackedWellViewTest(SimpleWellViewTest):
         view = self.view_class.as_view(**self.default_kwargs())
         result = view(self.factory.get("/"))
         self.assertInContext('well', self.well, result)
+
+    def test_passes_object_list_to_the_render(self):
+        kwargs = self.default_kwargs()
+        view = self.view_class.as_view(**kwargs)
+        result = view(self.factory.get("/"))
+        self.assertInContext('object_list', kwargs['queryset'], result)
