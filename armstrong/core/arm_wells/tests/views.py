@@ -106,3 +106,8 @@ class QuerySetBackedWellViewTest(SimpleWellViewTest):
         self.assertEqual(len(stories), len(queryset))
         for story in stories:
             self.assert_(story in queryset)
+
+    def test_passes_a_well_to_the_render(self):
+        view = self.view_class.as_view(**self.default_kwargs())
+        result = view(self.factory.get("/"))
+        self.assertInContext('well', self.well, result)
