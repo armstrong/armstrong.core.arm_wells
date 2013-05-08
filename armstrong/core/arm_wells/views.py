@@ -1,6 +1,6 @@
 from django.core.exceptions import ImproperlyConfigured
 from django.views.generic import TemplateView
-from django.views.generic.list import BaseListView
+from django.views.generic.list import MultipleObjectMixin
 from django.utils.translation import ugettext as _
 
 from .models import Well
@@ -30,7 +30,7 @@ class SimpleWellView(TemplateView):
         return context
 
 
-class QuerySetBackedWellView(BaseListView, SimpleWellView):
+class QuerySetBackedWellView(SimpleWellView, MultipleObjectMixin):
     def get_queryset(self):
         well = self.get_well()
         return (well.items if well is not None
