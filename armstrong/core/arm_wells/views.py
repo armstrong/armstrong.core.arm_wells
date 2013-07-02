@@ -41,3 +41,19 @@ class QuerySetBackedWellView(SimpleWellView, MultipleObjectMixin):
         if well:
             well.merge_with(super(QuerySetBackedWellView, self).get_queryset())
         return well
+
+    def get_context_data(self, **kwargs):
+        queryset = self.get_queryset()
+        # manually build context because in Django 1.4, `TemplateView` does not
+        # build it properly (bug #16074, see:
+        # https://code.djangoproject.com/ticket/16074). This function can be
+        # simplified once Django 1.4 support is dropped.
+        context = SimpleWellView.get_context_data(self,
+            object_list=queryset,
+            **kwargs
+        )
+        context.update(MultipleObjectMixin.get_context_data(self,
+            object_list=queryset,
+            **kwargs
+        ))
+        return context
