@@ -1,8 +1,4 @@
 from django.core.exceptions import ImproperlyConfigured
-from django.db.models.query import QuerySet
-from django.http import HttpRequest
-from django.test.client import RequestFactory
-import fudge
 import random
 
 from .arm_wells_support.models import Story
@@ -39,7 +35,7 @@ class SimpleWellViewTest(WellViewTestCase):
         del kwargs["template_name"]
         view = self.view_class.as_view(**kwargs)
         with self.assertRaises(ImproperlyConfigured) as context_manager:
-            response = view(self.factory.get("/"))
+            view(self.factory.get("/"))
 
         self.assertEqual(
             "TemplateResponseMixin requires either a definition of "
@@ -110,3 +106,17 @@ class QuerySetBackedWellViewTest(SimpleWellViewTest):
         self.assertEqual(len(stories), len(queryset))
         for story in stories:
             self.assert_(story in queryset)
+
+    def test_passes_a_well_to_the_render(self):
+        view = self.view_class.as_view(**self.default_kwargs())
+        result = view(self.factory.get("/"))
+        self.assertInContext('well', self.well, result)
+
+    def test_passes_object_list_to_the_render(self):
+        kwargs = self.default_kwargs()
+        view = self.view_class.as_view(**kwargs)
+        result = view(self.factory.get("/"))
+        self.assertIn('object_list', result.context_data)
+        self.assertEqual(
+            list(result.context_data['object_list']),
+            list(self.well.items))

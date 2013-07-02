@@ -128,8 +128,15 @@ can add this however you like.  This works as a copy-and-paste solution:
 Once installed, you have to run either ``syncdb`` or ``migrate`` if you are
 using `South`_.
 
+.. note:: ``armstrong.core.arm_wells`` requires the package `django-reversion`_
+          which does not support multiple versions of Django.  Because of this,
+          we can't specify a version of django-reversion for you to use.  Please
+          consult the `wiki page`_ to determine which version you should use.
+
 .. _pip: http://www.pip-installer.org/
 .. _South: http://south.aeracode.org/
+.. _django-reversion: https://github.com/etianen/django-reversion/
+.. _wiki page: https://github.com/etianen/django-reversion/wiki/Compatible-Django-Versions
 
 
 Contributing

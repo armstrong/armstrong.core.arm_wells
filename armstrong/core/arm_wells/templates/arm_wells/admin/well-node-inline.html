@@ -1,4 +1,5 @@
 {% extends 'admin/edit_inline/backbone.html' %}
+{% load url from future %}
 
 {% block emptyForm %}
       {% for field in inline_admin_formset.formset.empty_form.hidden_fields %}
@@ -20,12 +21,12 @@
             namespace: '{{ namespace }}',
             el: '#{{ namespace }}-collection',
             emptyForm: {{ namespace }}EmptyForm,
-            preview_url: '{% url admin:render_model_preview %}'
+            preview_url: '{% url 'admin:render_model_preview' %}'
         });
         armstrong.widgets.generickey($, {
-          facetURL: "{% url admin:generic_key_facets %}",
-          queryLookupURL: "{% url admin:type_and_model_to_query %}",
-          baseLookupURL: "{% url admin:index %}",
+          facetURL: "{% url 'admin:generic_key_facets' %}",
+          queryLookupURL: "{% url 'admin:type_and_model_to_query' %}",
+          baseLookupURL: "{% url 'admin:index' %}",
           id: "id_{{ namespace }}-__prefix__-object_id",
           searchDone: function(app) {
             {{ namespace }}EmptyForm.trigger('createObject');
