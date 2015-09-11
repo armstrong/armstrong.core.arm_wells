@@ -3,7 +3,6 @@
     "version": "1.10.0",
     "description": "Provides the basic well objects",
     "install_requires": [
-        "django-reversion",
-        "armstrong.hatband>=1.2.4"
+        "django-reversion"
     ]
 }
