@@ -1,10 +1,6 @@
-from django.conf import settings
 from django.contrib import admin
-from django.contrib.contenttypes import generic
+from django.utils.safestring import mark_safe
 from reversion.admin import VersionAdmin
-
-from armstrong.hatband.options import BackboneInline
-from armstrong.hatband.forms import OrderableGenericKeyLookupForm
 
 from . import models
 
@@ -13,27 +9,8 @@ class NodeAdmin(VersionAdmin):
     pass
 
 
-class NodeInlineAdminForm(OrderableGenericKeyLookupForm):
-    if getattr(settings, "ARMSTRONG_ADMIN_PROVIDE_STATIC", True):
-        class Media:
-            js = (
-                    'hatband/js/jquery-ui-1.8.16.min.js',
-                    'arm_wells/js/well-node-inline.js',
-                  )
-            css = {'all': ('arm_wells/css/well-node-inline.css',
-                           'hatband/css/jquery/ui-lightness/jquery-ui-1.8.16.custom.css',)}
-
-
-class NodeInline(BackboneInline):
-    template = 'arm_wells/admin/well-node-inline.html'
-    form = NodeInlineAdminForm
+class NodeInline(admin.TabularInline):
     model = models.Node
-
-    # This is for Grappelli
-    sortable_field_name = "order"
-    related_lookup_fields = {
-        'generic': ['content_type', 'object_id', ]
-    }
 
 
 class WellAdmin(VersionAdmin):
