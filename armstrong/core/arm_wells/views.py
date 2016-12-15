@@ -1,5 +1,5 @@
 from django.core.exceptions import ImproperlyConfigured
-from django.views.generic import TemplateView
+from django.views.generic.base import TemplateView
 from django.views.generic.list import MultipleObjectMixin
 from django.utils.translation import ugettext as _
 

@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.contenttypes import generic
+from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 
 from ...models import WellBase, NodeBase, WellTypeBase, WellType
@@ -27,7 +27,7 @@ class Image(Content):
 class OddNode(models.Model):
     foo = models.ForeignKey(ContentType)
     bar = models.PositiveIntegerField()
-    baz = generic.GenericForeignKey('foo', 'bar')
+    baz = GenericForeignKey('foo', 'bar')
 
 
 class MissingFieldWell(WellBase):
