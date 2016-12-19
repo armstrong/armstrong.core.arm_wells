@@ -1,7 +1,7 @@
 import datetime
 
 from django.db import models
-from django.contrib.contenttypes import generic
+from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 
 from .managers import WellManager
@@ -103,7 +103,7 @@ class NodeBase(models.Model):
     order = models.IntegerField(default=0)
     content_type = models.ForeignKey(ContentType)
     object_id = models.PositiveIntegerField()
-    content_object = generic.GenericForeignKey('content_type', 'object_id')
+    content_object = GenericForeignKey('content_type', 'object_id')
 
     class Meta:
         abstract = True
