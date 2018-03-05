@@ -77,6 +77,10 @@ class WellBase(models.Model):
         else:
             return MergeQuerySet(node_qs, self.queryset)
 
+    @property
+    def through_items(self):
+        return self.nodes.prefetch_related('content_object')
+
     def merge_with(self, queryset):
         self.queryset = queryset
         return self.items
