@@ -143,3 +143,4 @@ class Node(NodeBase):
 
     """
     well = models.ForeignKey(Well, related_name="nodes")
+    well_summary = models.TextField(blank=True, default='')
