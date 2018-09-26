@@ -3,36 +3,34 @@
 from __future__ import unicode_literals
 
 from django.db import migrations
-from django.template.defaultfilters import striptags
-from app.templatetags.custom_filters import replace_entities
 
-MAIN_CTS = [9, 13, 14, 16, 36, 106]
+# MAIN_CTS = [9, 13, 14, 16, 36, 106]
 
 
-def cp_summaries_to_wells(apps, schema_editor):
-    Node = apps.get_model('arm_wells', 'Node')
-    Content = apps.get_model('base', 'Content')
-    content_nodes = Node.objects.filter(content_type_id__in=MAIN_CTS)
-    content_map = {item.id: item.long_summary or item.summary_caption for item in
-        Content.objects.filter(id__in=content_nodes.values_list('object_id', flat=True))}
-    for i, item in enumerate(content_nodes):
-        if i % 1000 == 0:
-            print('On item %d' % i)
-        try:
-            item.well_summary = replace_entities(striptags(content_map[item.object_id]))
-        except KeyError:
-            print('MISSED on id %d' % item.object_id)
-        else:
-            item.save()
+# def cp_summaries_to_wells(apps, schema_editor):
+#     Node = apps.get_model('arm_wells', 'Node')
+#     Content = apps.get_model('base', 'Content')
+#     content_nodes = Node.objects.filter(content_type_id__in=MAIN_CTS)
+#     content_map = {item.id: item.long_summary or item.summary_caption for item in
+#         Content.objects.filter(id__in=content_nodes.values_list('object_id', flat=True))}
+#     for i, item in enumerate(content_nodes):
+#         if i % 1000 == 0:
+#             print('On item %d' % i)
+#         try:
+#             item.well_summary = replace_entities(striptags(content_map[item.object_id]))
+#         except KeyError:
+#             print('MISSED on id %d' % item.object_id)
+#         else:
+#             item.save()
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
         ('arm_wells', '0002_node_well_summary'),
-        ('base', '0004_migrate_bylines'),
+        #('base', '0004_migrate_bylines'),
     ]
 
     operations = [
-        migrations.RunPython(cp_summaries_to_wells, reverse_code=migrations.RunPython.noop)
+        #migrations.RunPython(cp_summaries_to_wells, reverse_code=migrations.RunPython.noop)
     ]
