@@ -1,6 +1,6 @@
 {
     "name": "armstrong.core.arm_wells",
-    "version": "1.10.0.dev5",
+    "version": "1.10.0.dev6",
     "description": "Provides the basic well objects",
     "install_requires": [
         "django-reversion"
