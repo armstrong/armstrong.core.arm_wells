@@ -3,11 +3,12 @@ import datetime
 from django.db import models
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
+from django.utils.encoding import python_2_unicode_compatible
 
 from .managers import WellManager
 from .querysets import MergeQuerySet, GenericForeignKeyQuerySet
 
-
+@python_2_unicode_compatible
 class WellTypeBase(models.Model):
     """
     Abstract WellType
@@ -22,10 +23,10 @@ class WellTypeBase(models.Model):
     class Meta:
         abstract = True
 
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
-
+@python_2_unicode_compatible
 class WellBase(models.Model):
     """
     Abstract Well
@@ -60,7 +61,7 @@ class WellBase(models.Model):
     def title(self):
         return self.type.title
 
-    def __unicode__(self):
+    def __str__(self):
         return "%s (%s - %s)" % (self.type, self.pub_date,
                                  self.expires or "Never")
 
@@ -85,7 +86,7 @@ class WellBase(models.Model):
         self.queryset = queryset
         return self.items
 
-
+@python_2_unicode_compatible
 class NodeBase(models.Model):
     """
     Abstract Node
@@ -113,7 +114,7 @@ class NodeBase(models.Model):
         abstract = True
         ordering = ["order"]
 
-    def __unicode__(self):
+    def __str__(self):
         return u"%s (%d): %s" % (self.well.title, self.order,
                                  self.content_object)
 
