@@ -106,7 +106,7 @@ class NodeBase(models.Model):
         raise NotImplementedError("The 'well' field must be implemented")
 
     order = models.IntegerField(default=0)
-    content_type = models.ForeignKey(ContentType)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey('content_type', 'object_id')
 
@@ -137,7 +137,7 @@ class Well(WellBase):
     Adds the required relation of the Well to the WellType.
 
     """
-    type = models.ForeignKey(WellType)
+    type = models.ForeignKey(WellType, on_delete=models.CASCADE)
 
 
 class Node(NodeBase):
@@ -147,5 +147,5 @@ class Node(NodeBase):
     Adds the required relation of the Node to the Well.
 
     """
-    well = models.ForeignKey(Well, related_name="nodes")
+    well = models.ForeignKey(Well, related_name="nodes", on_delete=models.CASCADE)
     well_summary = models.TextField(blank=True, default='')
