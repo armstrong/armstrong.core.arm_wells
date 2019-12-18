@@ -8,6 +8,7 @@ from django.utils.encoding import python_2_unicode_compatible
 from .managers import WellManager
 from .querysets import MergeQuerySet, GenericForeignKeyQuerySet
 
+
 @python_2_unicode_compatible
 class WellTypeBase(models.Model):
     """
@@ -25,6 +26,7 @@ class WellTypeBase(models.Model):
 
     def __str__(self):
         return self.title
+
 
 @python_2_unicode_compatible
 class WellBase(models.Model):
@@ -52,6 +54,7 @@ class WellBase(models.Model):
 
     class Meta:
         abstract = True
+        unique_together = [['type', 'pub_date'], ]
 
     def __init__(self, *args, **kwargs):
         super(WellBase, self).__init__(*args, **kwargs)
