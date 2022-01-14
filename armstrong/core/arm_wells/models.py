@@ -3,13 +3,11 @@ import datetime
 from django.db import models
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
-from django.utils.encoding import python_2_unicode_compatible
 
 from .managers import WellManager
 from .querysets import MergeQuerySet, GenericForeignKeyQuerySet
 
 
-@python_2_unicode_compatible
 class WellTypeBase(models.Model):
     """
     Abstract WellType
@@ -28,7 +26,6 @@ class WellTypeBase(models.Model):
         return self.title
 
 
-@python_2_unicode_compatible
 class WellBase(models.Model):
     """
     Abstract Well
@@ -89,7 +86,7 @@ class WellBase(models.Model):
         self.queryset = queryset
         return self.items
 
-@python_2_unicode_compatible
+
 class NodeBase(models.Model):
     """
     Abstract Node
